@@ -1,10 +1,10 @@
 {
-  "domain": "grow_controller",
-  "name": "Grow Controller",
+  "domain": "mannito_farming",
+  "name": "Mannito Farming",
   "codeowners": [],
   "config_flow": true,
   "dependencies": [],
-  "documentation": "https://github.com/yourusername/grow_controller",
+  "documentation": "https://github.com/mannipulator/mannito-farming-integration",
   "homekit": {},
   "integration_type": "device",
   "iot_standards": [],
