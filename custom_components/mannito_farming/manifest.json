@@ -1,0 +1,13 @@
+{
+  "domain": "grow_controller",
+  "name": "Grow Controller",
+  "codeowners": [],
+  "config_flow": true,
+  "dependencies": [],
+  "documentation": "https://github.com/yourusername/grow_controller",
+  "homekit": {},
+  "integration_type": "device",
+  "iot_standards": [],
+  "requirements": ["aiohttp>=3.8.0"],
+  "version": "0.1.0"
+} 
