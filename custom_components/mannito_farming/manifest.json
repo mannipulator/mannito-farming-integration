@@ -9,5 +9,5 @@
   "integration_type": "device",
   "iot_standards": [],
   "requirements": ["aiohttp>=3.8.0"],
-  "version": "0.1.0"
+  "version": "0.1.1"
 } 
