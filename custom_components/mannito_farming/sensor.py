@@ -8,6 +8,7 @@ from homeassistant.components.sensor import (
     SensorDeviceClass,
     SensorEntity,
     SensorStateClass,
+    UnitOfTemperature
 )
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
@@ -50,7 +51,7 @@ class GrowControllerTemperatureSensor(SensorEntity):
     """Representation of a Grow Controller temperature sensor."""
 
     _attr_device_class = SensorDeviceClass.TEMPERATURE
-    _attr_native_unit_of_measurement = TEMP_CELSIUS
+    _attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
     _attr_state_class = SensorStateClass.MEASUREMENT
 
     def __init__(
