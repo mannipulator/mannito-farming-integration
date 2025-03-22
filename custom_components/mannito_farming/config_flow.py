@@ -71,8 +71,16 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             ]
             _LOGGER.debug("Available sensors: %s", sensors)
             if not sensors:
-                _LOGGER.warning("Keine Sensoren mit Geräteklasse 'humidity' oder 'temperature' gefunden.")
-             
+                _LOGGER.warning("Keine passenden Sensoren gefunden, überspringe Sensorauswahl")
+                return self.async_create_entry(
+                    title=f"Mannito Farming {self._host}",
+                    data={
+                        CONF_HOST: self._host,
+                        CONF_USERNAME: self._username,
+                        CONF_PASSWORD: self._password,
+                        CONF_SENSORS: [],
+                    },
+                )           
             try:
                 # Erstellen eines neuen Schemas mit der Sensorliste
                schema = vol.Schema({
