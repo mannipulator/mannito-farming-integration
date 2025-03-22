@@ -4,7 +4,7 @@ from __future__ import annotations
 import logging
 from datetime import timedelta
 from typing import Any
-
+from aiohttp import BasicAuth
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
