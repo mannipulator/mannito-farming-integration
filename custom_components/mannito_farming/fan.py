@@ -28,7 +28,7 @@ async def async_setup_entry(
                 GrowControllerFan(
                     coordinator,
                     entry,
-                    f"fan_{i+1}",
+                    f"FAN{i+1}",
                     f"Fan {i+1}",
                 )
             ]

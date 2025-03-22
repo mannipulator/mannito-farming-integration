@@ -8,6 +8,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers import config_validation as cv
+from homeassistant.components.sensor import SensorDeviceClass
 
 from .const import DOMAIN, CONF_SENSORS
 
@@ -66,6 +67,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 entity.entity_id
                 for entity in entity_registry.entities.values()
                 if entity.domain == "sensor"
+                and entity.device_class in [SensorDeviceClass.HUMIDITY, SensorDeviceClass.TEMPERATURE]        
             ]
             _LOGGER.debug("Available sensors: %s", sensors)
 

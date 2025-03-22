@@ -27,7 +27,7 @@ async def async_setup_entry(
             GrowControllerLight(
                 coordinator,
                 entry,
-                "light_1",
+                "DIMMER",
                 "Grow Light",
             )
         ]
@@ -77,8 +77,8 @@ class GrowControllerLight(LightEntity):
     async def async_update(self) -> None:
         """Update the light state."""
         state = await self.coordinator.async_get_device_state(self._device_id)
-        current_state = state.get("state", "off")
-        if current_state == "off":
+        current_state = state.get("state", "false")
+        if current_state == "false":
             self._attr_is_on = False
             self._attr_brightness = 0
         else:

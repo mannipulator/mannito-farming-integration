@@ -28,7 +28,7 @@ async def async_setup_entry(
                 GrowControllerSwitch(
                     coordinator,
                     entry,
-                    f"valve_{i+1}",
+                    f"SOLENOID{i+1}",
                     f"Valve {i+1}",
                     DEVICE_TYPE_VALVE,
                 )
@@ -42,7 +42,7 @@ async def async_setup_entry(
                 GrowControllerSwitch(
                     coordinator,
                     entry,
-                    f"pump_{i+1}",
+                    f"DOSE_PUMP{i+1}",
                     f"Pump {i+1}",
                     DEVICE_TYPE_PUMP,
                 )
@@ -55,7 +55,7 @@ async def async_setup_entry(
             GrowControllerSwitch(
                 coordinator,
                 entry,
-                f"socket_{i+1}",
+                f"RELAY_{i+1}",
                 f"Power Socket {i+1}",
                 DEVICE_TYPE_SOCKET,
             )
@@ -99,4 +99,4 @@ class GrowControllerSwitch(SwitchEntity):
     async def async_update(self) -> None:
         """Update the switch state."""
         state = await self.coordinator.async_get_device_state(self._device_id)
-        self._attr_is_on = state.get("state") == "on" 
+        self._attr_is_on = state.get("state") == "true" 
