@@ -1,5 +1,4 @@
 """The Mannito Farming integration."""
-"""https://github.com/msp1974/HAIntegrationExamples/tree/main"""
 from __future__ import annotations
 
 import logging
@@ -17,6 +16,7 @@ _LOGGER = logging.getLogger(__name__)
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up Mannito Farming from a config entry."""
+    _LOGGER.debug("Setting up entry with host: %s", entry.data[CONF_HOST])
     coordinator = MannitoFarmingDataUpdateCoordinator(
         hass,
         entry.data[CONF_HOST],
