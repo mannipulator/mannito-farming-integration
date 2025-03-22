@@ -10,7 +10,7 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.const import CONF_SENSORS
 
-from .const import API_BASE_URL, API_DEVICE_STATUS, API_SENSOR_UPDATE, API_DEVICE_CONTROL
+from .const import API_BASE_URL, API_DEVICE_STATUS, API_SENSOR_UPDATE, API_DEVICE_SET_STATE
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -83,7 +83,7 @@ class MannitoFarmingDataUpdateCoordinator(DataUpdateCoordinator):
 
     async def async_set_device_state(self, device_id: str, command: str) -> bool:
         """Set device state."""
-        url = API_DEVICE_CONTROL.format(host=self.host, device_id=device_id, command=command)
+        url = API_DEVICE_SET_STATE.format(host=self.host, device_id=device_id, command=command)
         try:
             async with self.session.post(
                 url

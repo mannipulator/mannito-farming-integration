@@ -10,7 +10,7 @@ CONF_SENSORS = "sensors"
 # API endpoints
 API_BASE_URL = "http://{host}:80/api"
 API_DEVICE_STATUS = API_BASE_URL + "/device/{device_id}"
-API_DEVICE_CONTROL = API_BASE_URL + "/device/{device_id}/{command}"
+API_DEVICE_SET_STATE = API_BASE_URL + "/device/{device_id}/{command}"
 API_SENSOR_UPDATE = API_BASE_URL + "/sensor"
 
 # Device types
