@@ -33,7 +33,7 @@ class MannitoFarmingDataUpdateCoordinator(DataUpdateCoordinator):
         self.session = async_get_clientsession(hass)
         self.hass = hass
         _LOGGER.debug("Coordinator initialized with host: %s", self.host)
-        
+
         super().__init__(
             hass,
             _LOGGER,
@@ -83,11 +83,10 @@ class MannitoFarmingDataUpdateCoordinator(DataUpdateCoordinator):
 
     async def async_set_device_state(self, device_id: str, command: str) -> bool:
         """Set device state."""
-        url = API_DEVICE_STATUS.format(host=self.host, device_id=device_id)
+        url = API_DEVICE_CONTROL.format(host=self.host, device_id=device_id, command=command)
         try:
             async with self.session.post(
-                url,
-                json={"state": command},
+                url
             ) as response:
                 return response.status == 200
         except Exception as err:

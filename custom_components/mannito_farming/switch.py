@@ -99,4 +99,4 @@ class GrowControllerSwitch(SwitchEntity):
     async def async_update(self) -> None:
         """Update the switch state."""
         state = await self.coordinator.async_get_device_state(self._device_id)
-        self._attr_is_on = state.get("state") == "true" 
+        self._attr_is_on = state.get("state") == True
