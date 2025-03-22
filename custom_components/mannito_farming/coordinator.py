@@ -10,7 +10,7 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.const import CONF_SENSORS
 
-from .const import API_BASE_URL, API_DEVICE_STATUS, API_SENSOR_UPDATE
+from .const import API_BASE_URL, API_DEVICE_STATUS, API_SENSOR_UPDATE, API_DEVICE_CONTROL
 
 _LOGGER = logging.getLogger(__name__)
 
