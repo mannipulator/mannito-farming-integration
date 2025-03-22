@@ -70,8 +70,7 @@ class MannitoFarmingDataUpdateCoordinator(DataUpdateCoordinator):
                 url = API_SENSOR_UPDATE.format(host=self.host)
                 async with self.session.post(
                     url,
-                    json=sensor_data,
-                    auth=BasicAuth(self.username, self.password),
+                    json=sensor_data
                 ) as response:
                     if response.status != 200:
                         _LOGGER.error(
@@ -88,7 +87,6 @@ class MannitoFarmingDataUpdateCoordinator(DataUpdateCoordinator):
             async with self.session.post(
                 url,
                 json={"state": command},
-                auth=BasicAuth(self.username, self.password),
             ) as response:
                 return response.status == 200
         except Exception as err:
@@ -101,7 +99,6 @@ class MannitoFarmingDataUpdateCoordinator(DataUpdateCoordinator):
         try:
             async with self.session.get(
                 url,
-                auth=BasicAuth(self.username, self.password),
             ) as response:
                 if response.status == 200:
                     return await response.json()
