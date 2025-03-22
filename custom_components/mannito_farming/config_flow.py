@@ -21,7 +21,7 @@ STEP_USER_DATA_SCHEMA = vol.Schema(
     }
 )
 
-class ConfigFlow(config_entries.ConfigFlow):
+class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow for Mannito Farming."""
 
     VERSION = 1
