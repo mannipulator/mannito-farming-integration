@@ -32,7 +32,8 @@ class MannitoFarmingDataUpdateCoordinator(DataUpdateCoordinator):
         self.sensors = sensors or []
         self.session = async_get_clientsession(hass)
         self.hass = hass
-
+        _LOGGER.debug("Coordinator initialized with host: %s", self.host)
+        
         super().__init__(
             hass,
             _LOGGER,

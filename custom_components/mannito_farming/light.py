@@ -84,7 +84,7 @@ class GrowControllerLight(LightEntity):
         else:
             self._attr_is_on = True
             try:
-                brightness = int(current_state.split(":")[1])
+                brightness = 50
                 self._attr_brightness = brightness
             except (IndexError, ValueError):
                 self._attr_brightness = 255 

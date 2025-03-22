@@ -1,4 +1,5 @@
 """The Mannito Farming integration."""
+"""https://github.com/msp1974/HAIntegrationExamples/tree/main"""
 from __future__ import annotations
 
 import logging
