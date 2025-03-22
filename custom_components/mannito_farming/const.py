@@ -1,7 +1,7 @@
-"""Constants for the Grow Controller integration."""
+"""Constants for the Mannito Farming integration."""
 from homeassistant.const import Platform
 
-DOMAIN = "grow_controller"
+DOMAIN = "mannito_farming"
 PLATFORMS = [Platform.SWITCH, Platform.LIGHT, Platform.SENSOR, Platform.FAN]
 
 CONF_DEVICE_ID = "device_id"
@@ -22,4 +22,4 @@ DEVICE_TYPE_SOCKET = "socket"
 DEVICE_TYPE_SENSOR = "sensor"
 
 # Default names
-DEFAULT_NAME = "Grow Controller" 
+DEFAULT_NAME = "Mannito Farming" 

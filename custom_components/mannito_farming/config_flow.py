@@ -1,14 +1,18 @@
-"""Config flow for Grow Controller integration."""
+"""Config flow for Mannito Farming integration."""
 from __future__ import annotations
-
+import logging
 import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.const import CONF_HOST, CONF_PASSWORD, CONF_USERNAME
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers import entity_registry as er
+from homeassistant.helpers import config_validation as cv
 
 from .const import DOMAIN, CONF_SENSORS
+
+_LOGGER = logging.getLogger(__name__)
+
 
 STEP_USER_DATA_SCHEMA = vol.Schema(
     {
@@ -27,10 +31,11 @@ STEP_SENSOR_DATA_SCHEMA = vol.Schema(
     }
 )
 
-class GrowControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
-    """Handle a config flow for Grow Controller."""
+class ConfigFlow(config_entries.ConfigFlow):
+    """Handle a config flow for Mannito Farming."""
 
     VERSION = 1
+    CONNECTION_CLASS = config_entries.CONN_CLASS_LOCAL_POLL
 
     def __init__(self):
         """Initialize the config flow."""
@@ -83,7 +88,7 @@ class GrowControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         self._sensors = user_input[CONF_SENSORS]
 
         return self.async_create_entry(
-            title=f"Grow Controller {self._host}",
+            title=f"Mannito Farming {self._host}",
             data={
                 CONF_HOST: self._host,
                 CONF_USERNAME: self._username,

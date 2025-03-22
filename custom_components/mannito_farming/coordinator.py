@@ -1,4 +1,4 @@
-"""Data update coordinator for Grow Controller."""
+"""Data update coordinator for Mannito Farming."""
 from __future__ import annotations
 
 import logging
@@ -14,8 +14,8 @@ from .const import API_BASE_URL, API_DEVICE_STATUS, API_SENSOR_UPDATE
 
 _LOGGER = logging.getLogger(__name__)
 
-class GrowControllerDataUpdateCoordinator(DataUpdateCoordinator):
-    """Class to manage fetching data from the Grow Controller."""
+class MannitoFarmingDataUpdateCoordinator(DataUpdateCoordinator):
+    """Class to manage fetching data from the Mannito Farming controller."""
 
     def __init__(
         self,
@@ -36,19 +36,19 @@ class GrowControllerDataUpdateCoordinator(DataUpdateCoordinator):
         super().__init__(
             hass,
             _LOGGER,
-            name="Grow Controller",
+            name="Mannito Farming",
             update_interval=timedelta(seconds=30),
         )
 
     async def _async_update_data(self) -> dict[str, Any]:
-        """Fetch data from Grow Controller."""
+        """Fetch data from Mannito Farming controller."""
         try:
             # Update external sensors if configured
             if self.sensors:
                 await self._update_external_sensors()
             return {}
         except Exception as err:
-            _LOGGER.error("Error fetching Grow Controller data: %s", err)
+            _LOGGER.error("Error fetching Mannito Farming data: %s", err)
             raise
 
     async def _update_external_sensors(self) -> None:

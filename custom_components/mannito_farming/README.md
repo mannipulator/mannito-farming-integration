@@ -1,6 +1,6 @@
-# Grow Controller Integration for Home Assistant
+# Mannito Farming Integration for Home Assistant
 
-This custom integration allows you to control your ESP32-based grow controller through Home Assistant.
+This custom integration allows you to control your ESP32-based Mannito Farming controller through Home Assistant.
 
 ## Features
 
@@ -15,18 +15,19 @@ This custom integration allows you to control your ESP32-based grow controller t
 ## Installation
 
 1. Download this repository
-2. Copy the `grow_controller` folder to your Home Assistant's `custom_components` directory
+2. Copy the `mannito_farming` folder to your Home Assistant's `custom_components` directory
 3. Restart Home Assistant
 
 ## Configuration
 
 1. Go to Settings -> Devices & Services
 2. Click "Add Integration"
-3. Search for "Grow Controller"
+3. Search for "Mannito Farming"
 4. Enter the following information:
    - Host: The IP address of your ESP32 controller
    - Username: Your controller's username
    - Password: Your controller's password
+5. Select the sensors you want to send to the controller
 
 ## API Endpoints
 
