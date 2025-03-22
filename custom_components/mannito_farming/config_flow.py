@@ -70,14 +70,13 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 and entity.device_class in [SensorDeviceClass.HUMIDITY, SensorDeviceClass.TEMPERATURE]        
             ]
             _LOGGER.debug("Available sensors: %s", sensors)
-
+            if not sensors:
+                _LOGGER.warning("Keine Sensoren mit Geräteklasse 'humidity' oder 'temperature' gefunden.")
+             
             try:
                 # Erstellen eines neuen Schemas mit der Sensorliste
-                schema = vol.Schema({
-                    vol.Required(CONF_SENSORS): vol.All(
-                        cv.multi_select(sensors),  # Sensorliste an multi_select übergeben
-                        vol.Length(min=1),
-                    ),
+               schema = vol.Schema({
+                    vol.Optional(CONF_SENSORS, default=[]): cv.multi_select(sensors),
                 })
                 _LOGGER.debug("Schema for sensor selection created successfully")
             except Exception as e:
