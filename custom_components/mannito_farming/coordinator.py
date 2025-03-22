@@ -108,4 +108,4 @@ class MannitoFarmingDataUpdateCoordinator(DataUpdateCoordinator):
                 return {}
         except Exception as err:
             _LOGGER.error("Error getting device state: %s", err)
-            return {} 
+            return {}

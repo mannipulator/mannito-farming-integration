@@ -9,8 +9,9 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from .const import (
     DEVICE_TYPE_VALVE,
     DEVICE_TYPE_PUMP,
+    DEVICE_TYPE_SOCKET
 )
-from .coordinator import GrowControllerDataUpdateCoordinator
+from .coordinator import MannitoFarmingDataUpdateCoordinator
 
 async def async_setup_entry(
     hass: HomeAssistant,
@@ -18,7 +19,7 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up the Grow Controller switch platform."""
-    coordinator: GrowControllerDataUpdateCoordinator = hass.data[entry.domain][entry.entry_id]
+    coordinator: MannitoFarmingDataUpdateCoordinator = hass.data[entry.domain][entry.entry_id]
 
     # Add valves
     for i in range(5):
@@ -47,6 +48,19 @@ async def async_setup_entry(
                 )
             ]
         )
+
+    for i in range(8):
+    async_add_entities(
+        [
+            GrowControllerSwitch(
+                coordinator,
+                entry,
+                f"socket_{i+1}",
+                f"Power Socket {i+1}",
+                DEVICE_TYPE_SOCKET,
+            )
+        ]
+    )
 
 class GrowControllerSwitch(SwitchEntity):
     """Representation of a Grow Controller switch."""

@@ -13,21 +13,11 @@ from .const import DOMAIN, CONF_SENSORS
 
 _LOGGER = logging.getLogger(__name__)
 
-
 STEP_USER_DATA_SCHEMA = vol.Schema(
     {
         vol.Required(CONF_HOST): str,
         vol.Required(CONF_USERNAME): str,
         vol.Required(CONF_PASSWORD): str,
-    }
-)
-
-STEP_SENSOR_DATA_SCHEMA = vol.Schema(
-    {
-        vol.Required(CONF_SENSORS): vol.All(
-            cv.multi_select,
-            vol.Length(min=1),
-        ),
     }
 )
 
@@ -48,7 +38,9 @@ class ConfigFlow(config_entries.ConfigFlow):
         self, user_input: dict[str, str] | None = None
     ) -> FlowResult:
         """Handle the initial step."""
+        _LOGGER.debug("async_step_user called with user_input: %s", user_input)
         if user_input is None:
+            _LOGGER.debug("Showing form for step 'user'")
             return self.async_show_form(
                 step_id="user",
                 data_schema=STEP_USER_DATA_SCHEMA,
@@ -57,13 +49,16 @@ class ConfigFlow(config_entries.ConfigFlow):
         self._host = user_input[CONF_HOST]
         self._username = user_input[CONF_USERNAME]
         self._password = user_input[CONF_PASSWORD]
+        _LOGGER.debug("User input received: host=%s, username=%s", self._host, self._username)
 
+        _LOGGER.debug("Proceeding to sensor selection step")
         return await self.async_step_sensor()
 
     async def async_step_sensor(
         self, user_input: dict[str, list[str]] | None = None
     ) -> FlowResult:
         """Handle the sensor selection step."""
+        _LOGGER.debug("async_step_sensor called with user_input: %s", user_input)
         if user_input is None:
             # Get all available sensors
             entity_registry = er.async_get(self.hass)
@@ -72,21 +67,30 @@ class ConfigFlow(config_entries.ConfigFlow):
                 for entity in entity_registry.entities.values()
                 if entity.domain == "sensor"
             ]
+            _LOGGER.debug("Available sensors: %s", sensors)
+
+            try:
+                # Erstellen eines neuen Schemas mit der Sensorliste
+                schema = vol.Schema({
+                    vol.Required(CONF_SENSORS): vol.All(
+                        cv.multi_select(sensors),  # Sensorliste an multi_select übergeben
+                        vol.Length(min=1),
+                    ),
+                })
+                _LOGGER.debug("Schema for sensor selection created successfully")
+            except Exception as e:
+                _LOGGER.error("Error creating schema for sensor selection: %s", e)
+                raise
 
             return self.async_show_form(
                 step_id="sensor",
-                data_schema=STEP_SENSOR_DATA_SCHEMA.extend(
-                    {
-                        vol.Required(CONF_SENSORS): vol.All(
-                            cv.multi_select,
-                            vol.Length(min=1),
-                        ),
-                    }
-                ),
+                data_schema=schema,
             )
 
         self._sensors = user_input[CONF_SENSORS]
+        _LOGGER.debug("Selected sensors: %s", self._sensors)
 
+        _LOGGER.debug("Creating config entry for host: %s", self._host)
         return self.async_create_entry(
             title=f"Mannito Farming {self._host}",
             data={
@@ -95,4 +99,4 @@ class ConfigFlow(config_entries.ConfigFlow):
                 CONF_PASSWORD: self._password,
                 CONF_SENSORS: self._sensors,
             },
-        ) 
+        )

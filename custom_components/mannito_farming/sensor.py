@@ -17,7 +17,7 @@ from homeassistant.const import (
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .coordinator import GrowControllerDataUpdateCoordinator
+from .coordinator import MannitoFarmingDataUpdateCoordinator
 
 async def async_setup_entry(
     hass: HomeAssistant,
@@ -25,7 +25,7 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up the Grow Controller sensor platform."""
-    coordinator: GrowControllerDataUpdateCoordinator = hass.data[entry.domain][entry.entry_id]
+    coordinator: MannitoFarmingDataUpdateCoordinator = hass.data[entry.domain][entry.entry_id]
 
     # Add temperature and humidity sensors
     for i in range(2):

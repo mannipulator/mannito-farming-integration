@@ -9,7 +9,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.util.percentage import ordered_list_item_to_percentage, percentage_to_ordered_list_item
 
-from .coordinator import GrowControllerDataUpdateCoordinator
+from .coordinator import MannitoFarmingDataUpdateCoordinator
 
 SPEED_LIST = ["off", "low", "medium", "high"]
 
@@ -19,7 +19,7 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up the Grow Controller fan platform."""
-    coordinator: GrowControllerDataUpdateCoordinator = hass.data[entry.domain][entry.entry_id]
+    coordinator: MannitoFarmingDataUpdateCoordinator = hass.data[entry.domain][entry.entry_id]
 
     # Add fans
     for i in range(10):
