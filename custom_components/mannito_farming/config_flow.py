@@ -66,8 +66,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             sensors = [
                 entity.entity_id
                 for entity in entity_registry.entities.values()
-                if entity.domain == "sensor"
-                and entity.device_class in [SensorDeviceClass.HUMIDITY, SensorDeviceClass.TEMPERATURE]        
+                if entity.domain == "sensor" and entity.device_class in [SensorDeviceClass.HUMIDITY, SensorDeviceClass.TEMPERATURE]
             ]
             _LOGGER.debug("Available sensors: %s", sensors)
             if not sensors:
@@ -84,7 +83,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             try:
                 # Erstellen eines neuen Schemas mit der Sensorliste
                schema = vol.Schema({
-                    vol.Optional(CONF_SENSORS, default=[]): cv.multi_select(sensors),
+                    vol.Optional(CONF_SENSORS, default=[]): cv.multi_select(sensors)
                 })
                 _LOGGER.debug("Schema for sensor selection created successfully")
             except Exception as e:
