@@ -50,17 +50,17 @@ async def async_setup_entry(
         )
 
     for i in range(8):
-    async_add_entities(
-        [
-            GrowControllerSwitch(
-                coordinator,
-                entry,
-                f"RELAY_{i+1}",
-                f"Power Socket {i+1}",
-                DEVICE_TYPE_SOCKET,
-            )
-        ]
-    )
+        async_add_entities(
+            [
+                GrowControllerSwitch(
+                    coordinator,
+                    entry,
+                    f"RELAY_{i+1}",
+                    f"Power Socket {i+1}",
+                    DEVICE_TYPE_SOCKET,
+                )
+            ]
+        )
 
 class GrowControllerSwitch(SwitchEntity):
     """Representation of a Grow Controller switch."""
