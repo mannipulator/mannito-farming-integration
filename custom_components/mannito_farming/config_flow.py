@@ -82,7 +82,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 )           
             try:
                 # Erstellen eines neuen Schemas mit der Sensorliste
-               schema = vol.Schema({
+                schema = vol.Schema({
                     vol.Optional(CONF_SENSORS, default=[]): cv.multi_select(sensors)
                 })
                 _LOGGER.debug("Schema for sensor selection created successfully")
