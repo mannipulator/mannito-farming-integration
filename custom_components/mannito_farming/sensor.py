@@ -18,7 +18,9 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .api import Device, DeviceType
+from .const import DOMAIN
 from .coordinator import MannitoFarmingDataUpdateCoordinator
+
 
 async def async_setup_entry(
     hass: HomeAssistant,
@@ -84,15 +86,10 @@ class GrowControllerTemperatureSensor(SensorEntity):
         # Identifiers are what group entities into the same device.
         # If your device is created elsewhere, you can just specify the indentifiers parameter.
         # If your device connects via another device, add via_device parameter with the indentifiers of that device.
-        return DeviceInfo(
-            name=f"ExampleDevice{self.device.device_id}",
-            manufacturer="Mannito Farming",
-            model="Door&Temp v1",
-            sw_version="1.0",
+        return DeviceInfo(          
             identifiers={
                 (
-                    DOMAIN,
-                    f"{self.coordinator.data.controller_name}-{self.device.device_id}",
+                    DOMAIN, self.device.device_id",
                 )
             },
         )

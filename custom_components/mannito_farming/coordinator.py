@@ -89,6 +89,8 @@ class MannitoFarmingDataUpdateCoordinator(DataUpdateCoordinator):
 
     async def async_set_device_state(self, device_id: str, command: str) -> bool:
         """Set device state."""
+
+        """ Create API here """
         url = API_DEVICE_SET_STATE.format(host=self.host, device_id=device_id, command=command)
         try:
             async with self.session.post(
