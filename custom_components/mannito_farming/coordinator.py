@@ -8,7 +8,13 @@ from aiohttp import BasicAuth
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
-from homeassistant.const import CONF_SENSORS
+from homeassistant.const import (
+    CONF_HOST,
+    CONF_PASSWORD,
+    CONF_SCAN_INTERVAL,
+    CONF_USERNAME,
+    CONF_SENSORS
+)
 
 from .const import API_BASE_URL, API_DEVICE_STATUS, API_SENSOR_UPDATE, API_DEVICE_SET_STATE
 
@@ -20,15 +26,14 @@ class MannitoFarmingDataUpdateCoordinator(DataUpdateCoordinator):
     def __init__(
         self,
         hass: HomeAssistant,
-        host: str,
-        username: str,
-        password: str,
-        sensors: list[str] | None = None,
+        config_entry: ConfigEntry
     ) -> None:
         """Initialize the data updater."""
-        self.host = host
-        self.username = username
-        self.password = password
+
+        self.host = config_entry.data[CONF_HOST]
+        self.username = config_entry.data[CONF_USERNAME]
+        self.password = config_entry.data[CONF_PASSWORD]
+
         self.sensors = sensors or []
         self.session = async_get_clientsession(hass)
         self.hass = hass
@@ -38,6 +43,7 @@ class MannitoFarmingDataUpdateCoordinator(DataUpdateCoordinator):
             hass,
             _LOGGER,
             name="Mannito Farming",
+            update_method=self.async_update_data,
             update_interval=timedelta(seconds=30),
         )
 

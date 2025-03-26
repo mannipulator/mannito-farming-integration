@@ -17,6 +17,7 @@ from homeassistant.const import (
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
+from .api import Device, DeviceType
 from .coordinator import MannitoFarmingDataUpdateCoordinator
 
 async def async_setup_entry(
@@ -57,12 +58,16 @@ class GrowControllerTemperatureSensor(SensorEntity):
         self,
         coordinator: GrowControllerDataUpdateCoordinator,
         entry: ConfigEntry,
-        device_id: str,
+        device: Device,
         name: str,
     ) -> None:
         """Initialize the temperature sensor."""
         self.coordinator = coordinator
-        self._device_id = device_id
+
+        # super().__init__(coordinator)
+        self.device = device
+        self.device_id = device.device_id
+
         self._attr_name = name
         self._attr_unique_id = f"{entry.entry_id}_{device_id}_temperature"
         self._attr_native_value = None
@@ -72,6 +77,26 @@ class GrowControllerTemperatureSensor(SensorEntity):
     def available(self) -> bool:
         """Return if entity is available."""
         return self.coordinator.last_update_success
+
+    @property
+    def device_info(self) -> DeviceInfo:
+        """Return device information."""
+        # Identifiers are what group entities into the same device.
+        # If your device is created elsewhere, you can just specify the indentifiers parameter.
+        # If your device connects via another device, add via_device parameter with the indentifiers of that device.
+        return DeviceInfo(
+            name=f"ExampleDevice{self.device.device_id}",
+            manufacturer="Mannito Farming",
+            model="Door&Temp v1",
+            sw_version="1.0",
+            identifiers={
+                (
+                    DOMAIN,
+                    f"{self.coordinator.data.controller_name}-{self.device.device_id}",
+                )
+            },
+        )
+
 
     async def async_update(self) -> None:
         """Update the sensor state."""
