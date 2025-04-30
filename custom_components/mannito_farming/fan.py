@@ -1,97 +1,182 @@
-"""Fan platform for Grow Controller."""
+"""Fan platform for Mannito Farming integration."""
 from __future__ import annotations
 
-from typing import Any
+import logging
+from dataclasses import dataclass
+from typing import Any, Dict, List, Optional
 
-from homeassistant.components.fan import FanEntity, FanEntityFeature
+from homeassistant.components.fan import (
+    FanEntity,
+    FanEntityDescription,
+    FanEntityFeature,
+)
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, callback
+from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.util.percentage import ordered_list_item_to_percentage, percentage_to_ordered_list_item
+from homeassistant.helpers.update_coordinator import CoordinatorEntity
+from homeassistant.util.percentage import (
+    int_states_in_range,
+    percentage_to_ranged_value,
+    ranged_value_to_percentage,
+)
 
+from .api import DeviceType
+from .const import (
+    DOMAIN,
+    FAN_COUNT,
+    DEVICE_TYPE_FAN,
+)
 from .coordinator import MannitoFarmingDataUpdateCoordinator
 
-SPEED_LIST = ["off", "low", "medium", "high"]
+_LOGGER = logging.getLogger(__name__)
+
+# Fan speed range
+SPEED_RANGE = (1, 100)  # Min speed, Max speed
+
+
+@dataclass
+class MannitoFarmingFanEntityDescription(FanEntityDescription):
+    """Entity description for Mannito Farming fans."""
+
+    device_type: str = DEVICE_TYPE_FAN
+    icon: str = "mdi:fan"
+
+
+# Fan descriptions for the 10 fans
+FAN_ENTITY_DESCRIPTIONS = [
+    MannitoFarmingFanEntityDescription(
+        key=f"fan_{i}",
+        translation_key="fan",
+        name=f"Fan {i}",
+    )
+    for i in range(1, FAN_COUNT + 1)
+]
+
 
 async def async_setup_entry(
     hass: HomeAssistant,
     entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    """Set up the Grow Controller fan platform."""
-    coordinator: MannitoFarmingDataUpdateCoordinator = hass.data[entry.domain][entry.entry_id]
+    """Set up the Mannito Farming fan platform."""
+    coordinator: MannitoFarmingDataUpdateCoordinator = hass.data[DOMAIN][entry.entry_id]
+
+    entities = []
 
     # Add fans
-    for i in range(10):
-        async_add_entities(
-            [
-                GrowControllerFan(
-                    coordinator,
-                    entry,
-                    f"FAN{i+1}",
-                    f"Fan {i+1}",
+    for description in FAN_ENTITY_DESCRIPTIONS:
+        device = await coordinator.get_device(description.key)
+        if device:
+            entities.append(
+                MannitoFarmingFan(
+                    coordinator=coordinator,
+                    entry_id=entry.entry_id,
+                    description=description,
                 )
-            ]
-        )
+            )
 
-class GrowControllerFan(FanEntity):
-    """Representation of a Grow Controller fan."""
+    async_add_entities(entities)
 
+
+class MannitoFarmingFan(CoordinatorEntity[MannitoFarmingDataUpdateCoordinator], FanEntity):
+    """Representation of a Mannito Farming fan."""
+
+    entity_description: MannitoFarmingFanEntityDescription
+    _attr_has_entity_name = True
     _attr_supported_features = FanEntityFeature.SET_SPEED
-    _attr_speed_list = SPEED_LIST
 
     def __init__(
         self,
-        coordinator: GrowControllerDataUpdateCoordinator,
-        entry: ConfigEntry,
-        device_id: str,
-        name: str,
+        coordinator: MannitoFarmingDataUpdateCoordinator,
+        entry_id: str,
+        description: MannitoFarmingFanEntityDescription,
     ) -> None:
         """Initialize the fan."""
-        self.coordinator = coordinator
-        self._device_id = device_id
-        self._attr_name = name
-        self._attr_unique_id = f"{entry.entry_id}_{device_id}"
-        self._attr_is_on = False
-        self._attr_percentage = 0
+        super().__init__(coordinator)
+        self.entity_description = description
+        self._device_id = description.key
+        self._attr_unique_id = f"{entry_id}_{self._device_id}"
+        
+        # Get a reference to the device info
+        device = coordinator.api.device_info
+        
+        # Set up device info
+        if device:
+            self._attr_device_info = DeviceInfo(
+                identifiers={(DOMAIN, coordinator.host)},
+                name=device.get("name", f"Mannito Farming {coordinator.host}"),
+                manufacturer="Mannito",
+                model=device.get("model", "Farming Controller"),
+                sw_version=device.get("firmware_version"),
+            )
 
     @property
-    def available(self) -> bool:
-        """Return if entity is available."""
-        return self.coordinator.last_update_success
+    def is_on(self) -> bool:
+        """Return true if the fan is on."""
+        device = self.coordinator._devices.get(self._device_id)
+        if device:
+            return device.state
+        return False
+
+    @property
+    def percentage(self) -> Optional[int]:
+        """Return the current speed percentage."""
+        device = self.coordinator._devices.get(self._device_id)
+        if device and device.speed is not None:
+            # Convert the device speed to percentage
+            return ranged_value_to_percentage(SPEED_RANGE, device.speed)
+        return None
+
+    @property
+    def speed_count(self) -> int:
+        """Return the number of speeds the fan supports."""
+        return int_states_in_range(SPEED_RANGE)
 
     async def async_turn_on(
-        self,
-        speed: str | None = None,
-        percentage: int | None = None,
-        preset_mode: str | None = None,
-        **kwargs: Any,
+        self, percentage: Optional[int] = None, preset_mode: Optional[str] = None, **kwargs: Any
     ) -> None:
         """Turn the fan on."""
-        if percentage is not None:
-            speed = percentage_to_ordered_list_item(SPEED_LIST, percentage)
-        elif speed is None:
-            speed = "medium"
-
-        if await self.coordinator.async_set_device_state(self._device_id, speed):
-            self._attr_is_on = True
-            self._attr_percentage = ordered_list_item_to_percentage(SPEED_LIST, speed)
+        if percentage is None:
+            # If no percentage provided, use 50%
+            speed = percentage_to_ranged_value(SPEED_RANGE, 50)
+        else:
+            # Convert percentage to device speed
+            speed = percentage_to_ranged_value(SPEED_RANGE, percentage)
+        
+        # First turn on the fan
+        await self.coordinator.async_set_device_state(self._device_id, True)
+        
+        # Then set the speed if applicable
+        if speed > 0:
+            await self.coordinator.async_set_fan_speed(self._device_id, speed)
+        
+        self.async_write_ha_state()
 
     async def async_turn_off(self, **kwargs: Any) -> None:
         """Turn the fan off."""
-        if await self.coordinator.async_set_device_state(self._device_id, "off"):
-            self._attr_is_on = False
-            self._attr_percentage = 0
-
+        await self.coordinator.async_set_device_state(self._device_id, False)
+        self.async_write_ha_state()
+    
     async def async_set_percentage(self, percentage: int) -> None:
         """Set the speed percentage of the fan."""
-        speed = percentage_to_ordered_list_item(SPEED_LIST, percentage)
-        if await self.coordinator.async_set_device_state(self._device_id, speed):
-            self._attr_percentage = percentage
+        # Convert percentage to device speed
+        speed = percentage_to_ranged_value(SPEED_RANGE, percentage)
+        
+        # If setting to 0, turn off the fan
+        if speed == 0:
+            await self.async_turn_off()
+            return
+        
+        # If the fan is off, turn it on first
+        if not self.is_on:
+            await self.coordinator.async_set_device_state(self._device_id, True)
+        
+        # Set the speed
+        await self.coordinator.async_set_fan_speed(self._device_id, speed)
+        self.async_write_ha_state()
 
-    async def async_update(self) -> None:
-        """Update the fan state."""
-        state = await self.coordinator.async_get_device_state(self._device_id)
-        current_speed = state.get("speed", "off")
-        self._attr_is_on = current_speed != "off"
-        self._attr_percentage = ordered_list_item_to_percentage(SPEED_LIST, current_speed) 
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        self.async_write_ha_state()

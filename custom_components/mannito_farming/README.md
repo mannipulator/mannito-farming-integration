@@ -1,18 +1,35 @@
 # Mannito Farming Integration for Home Assistant
 
-This custom integration allows you to control your ESP32-based Mannito Farming controller through Home Assistant.
+This custom integration allows you to control your Mannito Farming controller through Home Assistant.
 
 ## Features
 
-- Control 5 magnetic valves (as switches)
-- Control 10 ventilators with speed control
-- Control 4 dosing pumps (as switches)
-- Control 1 dimmable light
-- Control 8 power sockets
-- Monitor 2 temperature/humidity sensors
-- Automatic sensor state updates
+- **5 Magnetic Valves** - Control water flow with on/off switches
+- **10 Fans** - Control ventilation with on/off and speed control
+- **8 Relays** - Control power outlets/sockets with on/off switches
+- **4 Pumps** - Control liquid pumps with on/off switches
+- **Automatic device discovery** via mDNS/zeroconf (if supported by your controller)
+- **Periodic state updates** to keep Home Assistant in sync with your controller
+
+## Requirements
+
+- Home Assistant 2023.7.0 or newer
+- Mannito Farming controller accessible on your local network
+- Network connectivity between Home Assistant and the controller
 
 ## Installation
+
+### HACS (Recommended)
+
+1. Open HACS in your Home Assistant instance
+2. Go to "Integrations"
+3. Click the three dots in the top right corner and select "Custom repositories"
+4. Add the URL to this repository and select "Integration" as the category
+5. Click "Add"
+6. Search for "Mannito Farming" and install it
+7. Restart Home Assistant
+
+### Manual Installation
 
 1. Download this repository
 2. Copy the `mannito_farming` folder to your Home Assistant's `custom_components` directory
@@ -20,39 +37,61 @@ This custom integration allows you to control your ESP32-based Mannito Farming c
 
 ## Configuration
 
-1. Go to Settings -> Devices & Services
-2. Click "Add Integration"
+### Automatic Discovery
+
+If your controller supports mDNS/zeroconf advertising, Home Assistant should automatically discover it. You'll see a notification in the UI when a new Mannito Farming controller is discovered.
+
+### Manual Configuration
+
+1. Go to Settings → Devices & Services
+2. Click "Add Integration" in the bottom right corner
 3. Search for "Mannito Farming"
 4. Enter the following information:
-   - Host: The IP address of your ESP32 controller
-   - Username: Your controller's username
-   - Password: Your controller's password
-5. Select the sensors you want to send to the controller
+   - Host: The IP address or hostname of your controller
+   - Username: (Optional) Authentication username
+   - Password: (Optional) Authentication password
+
+## Device Structure
+
+Once configured, your controller will appear as a device in Home Assistant with the following entities:
+
+- **Valve 1-5**: Switches for controlling the magnetic valves
+- **Fan 1-10**: Fan entities with speed control
+- **Relay 1-8**: Switches for controlling the power relays
+- **Pump 1-4**: Switches for controlling the pumps
 
 ## API Endpoints
 
-The integration uses the following API endpoints:
+The integration uses the following API endpoints on your controller:
 
-- Device status: `http://<host>:80/api/device/<device_id>`
-- Device control: `http://<host>:80/api/device/<device_id>/<command>`
-- Sensor updates: `http://<host>:80/api/sensor`
+- Device state query: `http://{DEVICE_HOST}/api/device/{COMPONENT_NAME}/state` (GET)
+- Device state control: `http://{DEVICE_HOST}/api/device/{COMPONENT_NAME}/state/{true/false}` (POST)
+- Fan speed control: `http://{DEVICE_HOST}/api/device/{COMPONENT_NAME}/speed/{SPEED}` (POST)
+- Device configuration: `http://{DEVICE_HOST}/api/device/config` (GET)
 
-## Device IDs
+## Troubleshooting
 
-The integration uses the following device IDs:
+### Controller Not Found
 
-- Valves: `valve_1` through `valve_5`
-- Fans: `fan_1` through `fan_10`
-- Pumps: `pump_1` through `pump_4`
-- Light: `light_1`
-- Sensors: `sensor_1` and `sensor_2`
+If your controller is not automatically discovered:
+1. Make sure it's connected to the same network as your Home Assistant instance
+2. Try adding it manually using its IP address
+3. Check that your controller's firmware supports the required API endpoints
 
-## Requirements
+### Authentication Issues
 
-- Home Assistant 2023.1 or newer
-- ESP32 controller with the appropriate firmware
-- Network connectivity between Home Assistant and the controller
+If you're having authentication issues:
+1. Double-check your username and password
+2. Make sure your controller's firmware is up-to-date
+3. Check your controller's documentation for any special authentication requirements
+
+### Entities Not Updating
+
+If your entities are not updating properly:
+1. Check your network connection to the controller
+2. Restart the integration by removing and re-adding it
+3. Check your Home Assistant logs for any error messages
 
 ## Support
 
-For issues and feature requests, please create an issue in the GitHub repository. 
+For issues and feature requests, please create an issue in the GitHub repository.

@@ -41,7 +41,7 @@ class GrowControllerLight(LightEntity):
 
     def __init__(
         self,
-        coordinator: GrowControllerDataUpdateCoordinator,
+        coordinator: MannitoFarmingDataUpdateCoordinator,
         entry: ConfigEntry,
         device_id: str,
         name: str,
@@ -62,29 +62,18 @@ class GrowControllerLight(LightEntity):
     async def async_turn_on(self, **kwargs: Any) -> None:
         """Turn the light on."""
         brightness = kwargs.get(ATTR_BRIGHTNESS, 255)
-        if await self.coordinator.async_set_device_state(
-            self._device_id, f"on:{brightness}"
-        ):
+        if await self.coordinator.async_control_device(self._device_id, True):
             self._attr_is_on = True
             self._attr_brightness = brightness
 
     async def async_turn_off(self, **kwargs: Any) -> None:
         """Turn the light off."""
-        if await self.coordinator.async_set_device_state(self._device_id, "off"):
+        if await self.coordinator.async_control_device(self._device_id, False):
             self._attr_is_on = False
             self._attr_brightness = 0
 
     async def async_update(self) -> None:
         """Update the light state."""
-        state = await self.coordinator.async_get_device_state(self._device_id)
-        current_state = state.get("state", "false")
-        if current_state == "false":
-            self._attr_is_on = False
-            self._attr_brightness = 0
-        else:
-            self._attr_is_on = True
-            try:
-                brightness = 50
-                self._attr_brightness = brightness
-            except (IndexError, ValueError):
-                self._attr_brightness = 255 
+        state = await self.coordinator.async_fetch_device_state(self._device_id)
+        self._attr_is_on = state.get("state", False)
+        self._attr_brightness = state.get("brightness", 0)
