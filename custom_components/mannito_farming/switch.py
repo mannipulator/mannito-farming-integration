@@ -169,9 +169,7 @@ class MannitoFarmingSwitch(CoordinatorEntity[MannitoFarmingDataUpdateCoordinator
         return DeviceInfo(
             identifiers={(DOMAIN, self.coordinator.host)},
             name=f"Mannito Farming {self.coordinator.host}",
-            manufacturer="Mannito",
-            model=self.coordinator.api.device_info.get("model", "Farming Controller"),
-            sw_version=self.coordinator.api.device_info.get("firmware_version"),
+            manufacturer="Mannito"
         )
 
     @property
