@@ -84,7 +84,9 @@ class MannitoFarmingFan(CoordinatorEntity[MannitoFarmingDataUpdateCoordinator], 
 
     entity_description: MannitoFarmingFanEntityDescription
     _attr_has_entity_name = True
-    _attr_supported_features = FanEntityFeature.SET_SPEED
+    _attr_supported_features = (
+        FanEntityFeature.SET_SPEED | FanEntityFeature.TURN_OFF | FanEntityFeature.TURN_ON
+    )
 
     def __init__(
         self,
