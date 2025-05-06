@@ -161,7 +161,7 @@ class API:
             
             # Process valves (5x)
             for i in range(1, 6):
-                device_id = f"valve_{i}"
+                device_id = f"SOLENOID{i}"
                 devices.append(Device(
                     device_id=device_id,
                     device_unique_id=f"{self.host}_{device_id}",
@@ -171,7 +171,7 @@ class API:
             
             # Process fans (10x)
             for i in range(1, 11):
-                device_id = f"fan_{i}"
+                device_id = f"FAN{i}"
                 devices.append(Device(
                     device_id=device_id,
                     device_unique_id=f"{self.host}_{device_id}",
@@ -182,7 +182,7 @@ class API:
             
             # Process relays (8x)
             for i in range(1, 9):
-                device_id = f"relay_{i}"
+                device_id = f"RELAY_{i}"
                 devices.append(Device(
                     device_id=device_id,
                     device_unique_id=f"{self.host}_{device_id}",
@@ -192,7 +192,7 @@ class API:
             
             # Process pumps (4x)
             for i in range(1, 5):
-                device_id = f"pump_{i}"
+                device_id = f"DOSE_PUMP{i}"
                 devices.append(Device(
                     device_id=device_id,
                     device_unique_id=f"{self.host}_{device_id}",
