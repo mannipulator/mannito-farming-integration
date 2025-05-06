@@ -142,19 +142,7 @@ class MannitoFarmingSwitch(CoordinatorEntity[MannitoFarmingDataUpdateCoordinator
         self.entity_description = description
         self._device_id = description.key
         self._attr_unique_id = f"{entry_id}_{self._device_id}"
-        
-        # Get a reference to the device info
-        device = coordinator.api.device_info
-        
-        # Set up device info
-        if device:
-            self._attr_device_info = DeviceInfo(
-                identifiers={(DOMAIN, coordinator.host)},
-                name=device.get("name", f"Mannito Farming {coordinator.host}"),
-                manufacturer="Mannito",
-                model=device.get("model", "Farming Controller"),
-                sw_version=device.get("firmware_version"),
-            )
+                
     
     @property
     def icon(self) -> str | None:
@@ -166,10 +154,12 @@ class MannitoFarmingSwitch(CoordinatorEntity[MannitoFarmingDataUpdateCoordinator
     @property
     def device_info(self) -> DeviceInfo:
         """Return the device info."""
+        device = self.coordinator.api.device_info
         return DeviceInfo(
             identifiers={(DOMAIN, self.coordinator.host)},
-            name=f"Mannito Farming {self.coordinator.host}",
-            manufacturer="Mannito"
+            name=device.get("name", f"Mannito Farming {self.coordinator.host}") if device else f"Mannito Farming {self.coordinator.host}",
+            sw_version=device.get("firmware_version", "unknown1"),
+            manufacturer="Mannito",
         )
 
     @property

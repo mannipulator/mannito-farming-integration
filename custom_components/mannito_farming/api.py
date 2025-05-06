@@ -208,8 +208,11 @@ class API:
     async def get_device_info(self) -> Dict[str, Any]:
         """Return device information from the cached configuration data."""
         if not self.device_info:
-            _LOGGER.error("Device configuration not loaded. Call fetch_device_config first.")
-            return {}
+            _LOGGER.info("Device configuration not loaded. Call fetch_device_config first.")
+            self.device_info = await self.fetch_device_config()
+            # return {}
+
+        _LOGGER.info("Found device-info: %s", self.device_info)
 
         return {
             "model": self.device_info.get("model", "Unknown Model"),

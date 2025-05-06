@@ -15,6 +15,7 @@ from homeassistant.const import (
     PERCENTAGE
 )
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .api import Device, DeviceType
@@ -78,10 +79,11 @@ class GrowControllerTemperatureSensor(SensorEntity):
     @property
     def device_info(self) -> DeviceInfo:
         """Return the device info."""
+        device = self.coordinator.api.device_info
         return DeviceInfo(
             identifiers={(DOMAIN, self.coordinator.host)},
-            name=f"Mannito Farming {self.coordinator.host}",
-            manufacturer="Mannito"
+            name=device.get("name", f"Mannito Farming {self.coordinator.host}") if device else f"Mannito Farming {self.coordinator.host}",
+            manufacturer="Mannito",
         )
 
     async def async_update(self) -> None:
