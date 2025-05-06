@@ -65,7 +65,7 @@ RELAY_ENTITY_DESCRIPTIONS = [
 # Switch descriptions for pumps
 PUMP_ENTITY_DESCRIPTIONS = [
     MannitoFarmingSwitchEntityDescription(
-        key=f"DOSE_PUMP{i}",
+        key=f"PUMP{i}",
         translation_key="pump",
         name=f"Pump {i}",
         device_type=DEVICE_TYPE_PUMP,
