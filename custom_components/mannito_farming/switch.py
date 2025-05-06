@@ -155,8 +155,9 @@ class MannitoFarmingSwitch(CoordinatorEntity[MannitoFarmingDataUpdateCoordinator
     def device_info(self) -> DeviceInfo:
         """Return the device info."""
         # Safely access device_info, providing defaults if not available
-        api_device_info = getattr(self.coordinator.api, "device_info", None) or {}
-        
+        # api_device_info = getattr(self.coordinator.api, "device_info", None) or {}
+        api_device_info = self.coordinator.device_info
+
         return DeviceInfo(
             identifiers={(DOMAIN, self.coordinator.host)},
             name=f"Mannito Farming {self.coordinator.host}",
