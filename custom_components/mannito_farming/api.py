@@ -136,7 +136,7 @@ class API:
         Raises:
             APIConnectionError: If connection fails
         """
-        url = f"http://{self.host}/api/device/config"
+        url = f"http://{self.host}/api/config"
         try:
             async with self.session.get(url, auth=self.auth) as response:
                 if response.status != 200:
