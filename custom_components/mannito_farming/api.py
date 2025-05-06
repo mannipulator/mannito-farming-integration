@@ -82,7 +82,10 @@ class API:
         Returns:
             True if successful, False otherwise
         """
-        url = f"http://{self.host}/api/device/{component_name}/state/{str(state).lower()}"
+
+        stateAsString = "on" if state else "off"
+
+        url = f"http://{self.host}/api/device/{component_name}/{stateAsString}"
         try:
             async with self.session.post(url, auth=self.auth) as response:
                 return response.status == 200
@@ -117,7 +120,7 @@ class API:
         Returns:
             Dictionary with device state information
         """
-        url = f"http://{self.host}/api/device/{component_name}/state"
+        url = f"http://{self.host}/api/device/{component_name}"
         try:
             async with self.session.get(url, auth=self.auth) as response:
                 if response.status == 200:
