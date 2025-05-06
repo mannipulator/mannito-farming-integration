@@ -33,6 +33,7 @@ class MannitoFarmingDataUpdateCoordinator(DataUpdateCoordinator[Dict[str, Any]])
         self.session = async_get_clientsession(hass)
         self.api = API(self.host, self.username, self.password, self.session)
         self._devices: Dict[str, Device] = {}
+        self.device_info: Dict[str, Any] = {}
         
         _LOGGER.debug("Initializing coordinator for host: %s", self.host)
         
@@ -53,6 +54,10 @@ class MannitoFarmingDataUpdateCoordinator(DataUpdateCoordinator[Dict[str, Any]])
             UpdateFailed: If the update fails
         """
         try:
+            # Load device info if not already loaded
+            if not self.device_info:
+                self.device_info = await self.api.get_device_info()
+                
             if not self._devices:
                 # First run, discover all devices
                 devices = await self.api.discover_devices()
@@ -133,7 +138,7 @@ class MannitoFarmingDataUpdateCoordinator(DataUpdateCoordinator[Dict[str, Any]])
             Dictionary containing device information.
         """
         try:
-            return await self.api.get_device_info()
+            return await self.device_info
         except Exception as err:
             _LOGGER.error("Error fetching device info: %s", err)
             return {}
