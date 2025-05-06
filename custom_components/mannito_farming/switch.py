@@ -39,7 +39,7 @@ class MannitoFarmingSwitchEntityDescription(SwitchEntityDescription):
 # Switch descriptions for valves
 VALVE_ENTITY_DESCRIPTIONS = [
     MannitoFarmingSwitchEntityDescription(
-        key=f"valve_{i}",
+        key=f"SOLENOID{i}",
         translation_key="valve",
         name=f"Valve {i}",
         device_type=DEVICE_TYPE_VALVE,
@@ -52,7 +52,7 @@ VALVE_ENTITY_DESCRIPTIONS = [
 # Switch descriptions for relays
 RELAY_ENTITY_DESCRIPTIONS = [
     MannitoFarmingSwitchEntityDescription(
-        key=f"relay_{i}",
+        key=f"RELAY{i}",
         translation_key="relay",
         name=f"Relay {i}",
         device_type=DEVICE_TYPE_RELAY,
@@ -65,7 +65,7 @@ RELAY_ENTITY_DESCRIPTIONS = [
 # Switch descriptions for pumps
 PUMP_ENTITY_DESCRIPTIONS = [
     MannitoFarmingSwitchEntityDescription(
-        key=f"pump_{i}",
+        key=f"DOSE_PUMP{i}",
         translation_key="pump",
         name=f"Pump {i}",
         device_type=DEVICE_TYPE_PUMP,

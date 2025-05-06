@@ -46,7 +46,7 @@ class MannitoFarmingFanEntityDescription(FanEntityDescription):
 # Fan descriptions for the 10 fans
 FAN_ENTITY_DESCRIPTIONS = [
     MannitoFarmingFanEntityDescription(
-        key=f"fan_{i}",
+        key=f"FAN{i}",
         translation_key="fan",
         name=f"Fan {i}",
     )
