@@ -167,14 +167,12 @@ class MannitoFarmingSwitch(CoordinatorEntity[MannitoFarmingDataUpdateCoordinator
     def device_info(self) -> DeviceInfo:
         """Return the device info."""
         return DeviceInfo(
-            identifiers={
-                # Serial numbers are unique identifiers within a specific domain
-                (DOMAIN, self.unique_id)
-            },
-            name="self.name",
-            manufacturer="Mannito Farming"
+            identifiers={(DOMAIN, self.coordinator.host)},
+            name=f"Mannito Farming {self.coordinator.host}",
+            manufacturer="Mannito",
+            model=self.coordinator.api.device_info.get("model", "Farming Controller"),
+            sw_version=self.coordinator.api.device_info.get("firmware_version"),
         )
-
 
     @property
     def is_on(self) -> bool:

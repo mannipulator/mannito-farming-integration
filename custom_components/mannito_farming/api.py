@@ -204,3 +204,28 @@ class API:
         except Exception as err:
             _LOGGER.error("Error discovering devices: %s", err)
             return []
+
+    async def get_device_info(self) -> Dict[str, Any]:
+        """Return device information from the cached configuration data."""
+        if not self.device_info:
+            _LOGGER.error("Device configuration not loaded. Call fetch_device_config first.")
+            return {}
+
+        return {
+            "model": self.device_info.get("model", "Unknown Model"),
+            "firmware_version": self.device_info.get("firmware_version", "Unknown Version"),
+            "serial_number": self.device_info.get("serial_number", "Unknown Serial"),
+            "manufacturer": self.device_info.get("manufacturer", "Mannito"),
+            "uptime": self.device_info.get("uptime", "Unknown Uptime"),
+            "ip_address": self.device_info.get("ip_address", self.host),
+        }
+
+# Example of what the `device_info` object might contain:
+# {
+#     "model": "Farming Controller v1.0",
+#     "firmware_version": "1.2.3",
+#     "serial_number": "12345-ABCDE",
+#     "manufacturer": "Mannito",
+#     "uptime": "72 hours",
+#     "ip_address": "192.168.1.100"
+# }

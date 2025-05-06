@@ -125,3 +125,24 @@ class MannitoFarmingDataUpdateCoordinator(DataUpdateCoordinator[Dict[str, Any]])
             if device.speed is not None:  # Only update if it's a fan
                 device.speed = speed
         return success
+
+    async def get_device_info(self) -> Dict[str, Any]:
+        """Fetch device information from the API.
+
+        Returns:
+            Dictionary containing device information.
+        """
+        try:
+            return await self.api.get_device_info()
+        except Exception as err:
+            _LOGGER.error("Error fetching device info: %s", err)
+            return {}
+
+    async def discover_and_update_devices(self) -> None:
+        """Discover devices and update the internal device list."""
+        try:
+            devices = await self.api.discover_devices()
+            for device in devices:
+                self._devices[device.device_id] = device
+        except Exception as err:
+            _LOGGER.error("Error discovering devices: %s", err)
