@@ -108,7 +108,7 @@ class MannitoFarmingFan(CoordinatorEntity[MannitoFarmingDataUpdateCoordinator], 
             self._attr_device_info = DeviceInfo(
                 identifiers={(DOMAIN, coordinator.host)},
                 name=device.get("name", f"Mannito Farming {coordinator.host}"),
-                manufacturer="Mannito",
+                manufacturer="Mannito Manufacturer",
                 model=device.get("model", "Farming Controller"),
                 sw_version=device.get("firmware_version"),
             )
@@ -120,6 +120,16 @@ class MannitoFarmingFan(CoordinatorEntity[MannitoFarmingDataUpdateCoordinator], 
         if device:
             return device.state
         return False
+
+    @property
+    def device_info(self) -> DeviceInfo:
+        """Return the device info."""
+        return DeviceInfo(
+            identifiers={(DOMAIN, self.coordinator.host)},
+            name=f"Mannito Farming {self.coordinator.host}",
+            manufacturer="Mannito"
+        )
+
 
     @property
     def percentage(self) -> Optional[int]:

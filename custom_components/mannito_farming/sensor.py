@@ -75,6 +75,15 @@ class GrowControllerTemperatureSensor(SensorEntity):
         """Return if entity is available."""
         return self.coordinator.last_update_success
 
+    @property
+    def device_info(self) -> DeviceInfo:
+        """Return the device info."""
+        return DeviceInfo(
+            identifiers={(DOMAIN, self.coordinator.host)},
+            name=f"Mannito Farming {self.coordinator.host}",
+            manufacturer="Mannito"
+        )
+
     async def async_update(self) -> None:
         """Update the sensor state."""
         state = await self.coordinator.async_fetch_device_state(self._device_id)
@@ -89,7 +98,7 @@ class GrowControllerHumiditySensor(SensorEntity):
 
     def __init__(
         self,
-        coordinator: GrowControllerDataUpdateCoordinator,
+        coordinator: MannitoFarmingDataUpdateCoordinator,
         entry: ConfigEntry,
         device_id: str,
         name: str,
@@ -106,6 +115,15 @@ class GrowControllerHumiditySensor(SensorEntity):
     def available(self) -> bool:
         """Return if entity is available."""
         return self.coordinator.last_update_success
+
+    @property
+    def device_info(self) -> DeviceInfo:
+        """Return the device info."""
+        return DeviceInfo(
+            identifiers={(DOMAIN, self.coordinator.host)},
+            name=f"Mannito Farming {self.coordinator.host}",
+            manufacturer="Mannito"
+        )
 
     async def async_update(self) -> None:
         """Update the sensor state."""
