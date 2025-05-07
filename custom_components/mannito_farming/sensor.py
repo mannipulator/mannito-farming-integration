@@ -79,12 +79,9 @@ class GrowControllerTemperatureSensor(SensorEntity):
     @property
     def device_info(self) -> DeviceInfo:
         """Return the device info."""
-        device = self.coordinator.get_device_info()
-        return DeviceInfo(
-            identifiers={(DOMAIN, self.coordinator.host)},
-            name=device.get("name", f"Mannito Farming {self.coordinator.host}") if device else f"Mannito Farming {self.coordinator.host}",
-            manufacturer="Mannito",
-        )
+        api_device_info = self.coordinator.get_device_info()
+        # _LOGGER.debug("Device info: %s", api_device_info)
+        return api_device_info
 
     async def async_update(self) -> None:
         """Update the sensor state."""

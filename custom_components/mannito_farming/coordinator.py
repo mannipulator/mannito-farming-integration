@@ -8,7 +8,7 @@ from homeassistant.const import CONF_HOST, CONF_PASSWORD, CONF_USERNAME
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
-
+from homeassistant.helpers.entity import DeviceInfo
 from .api import API, Device
 from .const import DEFAULT_UPDATE_INTERVAL, DOMAIN
 
@@ -134,13 +134,29 @@ class MannitoFarmingDataUpdateCoordinator(DataUpdateCoordinator[Dict[str, Any]])
                 device.speed = speed
         return success
 
-    def get_device_info(self) -> Dict[str, Any]:
+    def get_device_info(self) -> DeviceInfo:
         """Fetch device information from the API.
 
         Returns:
             Dictionary containing device information.
         """
-        return self.device_info if self.device_info else {}
+        api_device_info = self.device_info or {}
+        if not self.device_info:
+            # If device_info is not already loaded, fetch it
+            api_device_info = self.api.fetch_device_config()
+            _LOGGER.debug("Fetched Device info from api: %s", api_device_info)
+
+        return DeviceInfo(
+            identifiers={(DOMAIN, self.coordinator.host)},
+            name=api_device_info.get("name", f"Mannito Farming {self.coordinator.host}"),
+            manufacturer=api_device_info.get("manufacturer", "Mannito"),
+            model=api_device_info.get("model", "Farming Controller"),
+            sw_version=api_device_info.get("sw_version", "Unknown"),
+            hw_version=api_device_info.get("hw_version", "Unknown"),
+            serial_number=api_device_info.get("serial_number", "Unknown"),
+            configuration_url=api_device_info.get("configuration_url", f"http://{self.coordinator.host}"),
+        )
+
 
     async def discover_and_update_devices(self) -> None:
         """Discover devices and update the internal device list."""

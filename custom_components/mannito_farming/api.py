@@ -217,11 +217,14 @@ class API:
 
         return {
             "model": self.device_info.get("model", "Unknown Model"),
-            "firmware_version": self.device_info.get("firmware_version", "Unknown Version"),
+            "sw_version": self.device_info.get("firmware_version", "Unknown Version"),
+            "hw_version": self.device_info.get("hardware_version", "Unknown Version"),
             "serial_number": self.device_info.get("serial_number", "Unknown Serial"),
             "manufacturer": self.device_info.get("manufacturer", "Mannito"),
             "uptime": self.device_info.get("uptime", "Unknown Uptime"),
             "ip_address": self.device_info.get("ip_address", self.host),
+            "configuration_url": f"http://{self.host}",
+            "name": self.device_info.get("name", f"Mannito Farming {self.host}"),
         }
 
 # Example of what the `device_info` object might contain:

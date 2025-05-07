@@ -112,13 +112,9 @@ class MannitoFarmingFan(CoordinatorEntity[MannitoFarmingDataUpdateCoordinator], 
     @property
     def device_info(self) -> DeviceInfo:
         """Return the device info."""
-        device = self.coordinator.device_info
-        return DeviceInfo(
-            identifiers={(DOMAIN, self.coordinator.host)},
-            name=device.get("name", f"Mannito Farming {self.coordinator.host}") if device else f"Mannito Farming {self.coordinator.host}",
-            sw_version=device.get("firmware_version", "unknown"),
-            manufacturer="Mannito",
-        )
+        api_device_info = self.coordinator.get_device_info()
+        _LOGGER.debug("Device info: %s", api_device_info)
+        return api_device_info
 
 
     @property
