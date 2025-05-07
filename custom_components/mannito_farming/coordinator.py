@@ -131,17 +131,13 @@ class MannitoFarmingDataUpdateCoordinator(DataUpdateCoordinator[Dict[str, Any]])
                 device.speed = speed
         return success
 
-    async def get_device_info(self) -> Dict[str, Any]:
+    def get_device_info(self) -> Dict[str, Any]:
         """Fetch device information from the API.
 
         Returns:
             Dictionary containing device information.
         """
-        try:
-            return await self.device_info
-        except Exception as err:
-            _LOGGER.error("Error fetching device info: %s", err)
-            return {}
+        return self.device_info if self.device_info else {}
 
     async def discover_and_update_devices(self) -> None:
         """Discover devices and update the internal device list."""
