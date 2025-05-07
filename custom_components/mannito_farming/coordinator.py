@@ -54,9 +54,12 @@ class MannitoFarmingDataUpdateCoordinator(DataUpdateCoordinator[Dict[str, Any]])
             UpdateFailed: If the update fails
         """
         try:
+            _LOGGER.info("Starting _async_update_data")
             # Load device info if not already loaded
             if not self.device_info:
+                
                 self.device_info = await self.api.get_device_info()
+                _LOGGER.debug("Loaded Device info from api: %s", self.device_info)
                 
             if not self._devices:
                 # First run, discover all devices

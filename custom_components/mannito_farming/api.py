@@ -63,6 +63,7 @@ class API:
             True if connection is successful, False otherwise
         """
         try:
+            _LOGGER.info("Testing mannito connection")
             device_info = await self.fetch_device_config()
             self.connected = bool(device_info)
             self.device_info = device_info
