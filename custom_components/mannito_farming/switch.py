@@ -56,8 +56,8 @@ RELAY_ENTITY_DESCRIPTIONS = [
         translation_key="relay",
         name=f"Relay {i}",
         device_type=DEVICE_TYPE_RELAY,
-        icon_on="mdi:power-socket",
-        icon_off="mdi:power-socket-off",
+        icon_on="mdi:power-plug",
+        icon_off="mdi:power-plug-off",
     )
     for i in range(1, RELAY_COUNT + 1)
 ]
