@@ -10,5 +10,6 @@
   "iot_class": "local_polling",
   "requirements": ["aiohttp>=3.8.0"],
   "version": "0.2.0",
-  "zeroconf": ["_mannito-farming._tcp.local."]
+  "zeroconf": ["_mannito-farming._tcp.local."],
+  "loggers": ["custom_components.mannito_farming"]
 }
