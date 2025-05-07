@@ -147,14 +147,14 @@ class MannitoFarmingDataUpdateCoordinator(DataUpdateCoordinator[Dict[str, Any]])
             _LOGGER.debug("Fetched Device info from api: %s", api_device_info)
 
         return DeviceInfo(
-            identifiers={(DOMAIN, self.coordinator.host)},
-            name=api_device_info.get("name", f"Mannito Farming {self.coordinator.host}"),
-            manufacturer=api_device_info.get("manufacturer", "Mannito"),
-            model=api_device_info.get("model", "Farming Controller"),
+            identifiers={(DOMAIN, self.host)},
+            name=api_device_info.get("name", f"Mannito Farming {self.host}"),
+            manufacturer=api_device_info.get("manufacturer", "Mannito Farming"),
+            model=api_device_info.get("model", "Mannito Device"),
             sw_version=api_device_info.get("sw_version", "Unknown"),
             hw_version=api_device_info.get("hw_version", "Unknown"),
             serial_number=api_device_info.get("serial_number", "Unknown"),
-            configuration_url=api_device_info.get("configuration_url", f"http://{self.coordinator.host}"),
+            configuration_url=api_device_info.get("configuration_url", f"http://{self.host}"),
         )
 
 
