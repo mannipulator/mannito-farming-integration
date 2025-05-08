@@ -24,7 +24,6 @@ from homeassistant.util.percentage import (
 from .api import DeviceType
 from .const import (
     DOMAIN,
-    FAN_COUNT,
     DEVICE_TYPE_FAN,
 )
 from .coordinator import MannitoFarmingDataUpdateCoordinator
@@ -44,14 +43,14 @@ class MannitoFarmingFanEntityDescription(FanEntityDescription):
 
 
 # Fan descriptions for the 10 fans
-FAN_ENTITY_DESCRIPTIONS = [
-    MannitoFarmingFanEntityDescription(
-        key=f"FAN{i}",
+FAN_DESCRIPTIONS_MAP = {
+    f"FAN": MannitoFarmingFanEntityDescription(
         translation_key="fan",
-        name=f"Fan {i}",
+        device_type=DEVICE_TYPE_FAN,
+        icon_on="mdi:fan",
+        icon_off="mdi:fan-off",
     )
-    for i in range(1, FAN_COUNT + 1)
-]
+}
 
 
 async def async_setup_entry(
@@ -63,16 +62,19 @@ async def async_setup_entry(
     coordinator: MannitoFarmingDataUpdateCoordinator = hass.data[DOMAIN][entry.entry_id]
 
     entities = []
-
+    discovered_devices = await coordinator.get_all_devices()
+    _LOGGER.debug("Discovered devices: %s", discovered_devices)
     # Add fans
-    for description in FAN_ENTITY_DESCRIPTIONS:
-        device = await coordinator.get_device(description.key)
-        if device:
+    for device in discovered_devices:
+        descriptor: MannitoFarmingFanEntityDescription = FAN_DESCRIPTIONS_MAP[device.device_id]
+        if descriptor:
             entities.append(
                 MannitoFarmingFan(
                     coordinator=coordinator,
-                    entry_id=entry.entry_id,
-                    description=description,
+                    entry=entry,
+                    device_id=device.device_id,
+                    description=descriptor,
+                    name=device.name,
                 )
             )
 

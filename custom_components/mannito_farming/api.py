@@ -12,11 +12,29 @@ _LOGGER = logging.getLogger(__name__)
 
 class DeviceType(StrEnum):
     """Device types."""
-    VALVE = "valve"
-    FAN = "fan"
-    RELAY = "relay"
-    PUMP = "pump"
-    OTHER = "other"
+    
+    @classmethod
+    def parse(cls, value: str) -> "DeviceType":
+        """Parse a string into a DeviceType enum.
+        
+        Args:
+            value: The string to parse
+            
+        Returns:
+            The corresponding DeviceType enum value
+            
+        Raises:
+            ValueError: If the string doesn't match any DeviceType
+        """
+        try:
+            return cls(value.capitalize())
+        except ValueError:
+            raise ValueError(f"'{value}' is not a valid DeviceType")
+    FAN = "FAN"
+    RELAY = "RELAY"
+    SOLENOID = "SOLENOID"
+    PUMP = "PUMP"
+    OTHER = "ÔTHER"
 
 class SensorType(StrEnum):
     """Device types."""
@@ -29,6 +47,8 @@ class SensorType(StrEnum):
     PH = "ph"
     EC = "ec"
     OTHER = "other"
+
+
 
 @dataclass
 class Device:
@@ -199,14 +219,23 @@ class API:
         sensors = []
         try:
             config = await self.fetch_device_config()
+            deviceList=config.get("devices"),
             
+            for device in deviceList:
+                devices.append(Device(
+                    device_id=device.get("device_id"),
+                    device_unique_id=f"{self.host}_{device_id}",
+                    device_type=DeviceType.SOLENOID,
+                    device_id=device.get("device_name"),
+                ))
+
             # Process valves (5x)
             for i in range(1, 6):
-                device_id = f"SOLENOID{i}"
+                
                 devices.append(Device(
                     device_id=device_id,
                     device_unique_id=f"{self.host}_{device_id}",
-                    device_type=DeviceType.VALVE,
+                    device_type=DeviceType.SOLENOID,
                     name=f"Valve {i}"
                 ))
             

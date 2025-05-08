@@ -149,6 +149,11 @@ class MannitoFarmingSensor(CoordinatorEntity[MannitoFarmingDataUpdateCoordinator
 
     async def async_update(self) -> None:
         """Update the sensor state."""
-        state = await self.coordinator.async_fetch_device_state(self._device_id)
-        self._attr_native_value = state.get("temperature")
+        sensor = self.coordinator._sensors.get(self._device_id)
+        if sensor:
+            self._attr_native_value = sensor.value
+        
+
+        # state = await self.coordinator.async_fetch_device_state(self._device_id)
+        # self._attr_native_value = state.get("value")
 

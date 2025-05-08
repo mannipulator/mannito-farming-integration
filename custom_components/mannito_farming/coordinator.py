@@ -90,9 +90,9 @@ class MannitoFarmingDataUpdateCoordinator(DataUpdateCoordinator[Dict[str, Any]])
                 sensor_data = await self.api.get_sensor_state(sensor_id)
                 data[sensor_id] = sensor_data
                 
-                # Update stored device state
-                if "state" in state_data:
-                    sensor.state_value = state_data["state"]
+                # Update stored sensor value
+                if "value" in sensor_data:
+                    sensor.state_value = state_data["value"]
 
             return data
         except Exception as err:

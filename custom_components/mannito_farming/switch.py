@@ -38,7 +38,7 @@ class MannitoFarmingSwitchEntityDescription(SwitchEntityDescription):
 
 
 SWITCH_DESCRIPTIONS_MAP = {
-    f"SOLENOID{i}": MannitoFarmingSwitchEntityDescription(
+    f"SOLENOID": MannitoFarmingSwitchEntityDescription(
         key=f"SOLENOID{i}",
         translation_key="valve",
         name=f"Valve {i}",
@@ -46,7 +46,7 @@ SWITCH_DESCRIPTIONS_MAP = {
         icon_on="mdi:water",
         icon_off="mdi:water-off",
     )
-    for i in range(1, VALVE_COUNT + 1)
+    
 }
 
 
@@ -101,6 +101,7 @@ async def async_setup_entry(
     entities = []
 
     discovered_devices = await coordinator.get_all_devices()
+    _LOGGER.debug("Discovered switch-devices: %s", discovered_devices)
     for device in discovered_devices:
         descriptor: MannitoFarmingSwitchEntityDescription = SWITCH_DESCRIPTIONS_MAP[device.device_id]
         if descriptor:
@@ -113,44 +114,44 @@ async def async_setup_entry(
                     name=device.name,
                 )
             )
-
-    # Add valves
-    for description in VALVE_ENTITY_DESCRIPTIONS:
-        device = await coordinator.get_device(description.key)
-        if device:
-            entities.append(
-                MannitoFarmingSwitch(
-                    coordinator=coordinator,
-                    entry_id=entry.entry_id,
-                    description=description,
-                )
-            )
-
-    # Add relays
-    for description in RELAY_ENTITY_DESCRIPTIONS:
-        device = await coordinator.get_device(description.key)
-        if device:
-            entities.append(
-                MannitoFarmingSwitch(
-                    coordinator=coordinator,
-                    entry_id=entry.entry_id,
-                    description=description,
-                )
-            )
-
-    # Add pumps
-    for description in PUMP_ENTITY_DESCRIPTIONS:
-        device = await coordinator.get_device(description.key)
-        if device:
-            entities.append(
-                MannitoFarmingSwitch(
-                    coordinator=coordinator,
-                    entry_id=entry.entry_id,
-                    description=description,
-                )
-            )
-
     async_add_entities(entities)
+
+    # # Add valves
+    # for description in VALVE_ENTITY_DESCRIPTIONS:
+    #     device = await coordinator.get_device(description.key)
+    #     if device:
+    #         entities.append(
+    #             MannitoFarmingSwitch(
+    #                 coordinator=coordinator,
+    #                 entry_id=entry.entry_id,
+    #                 description=description,
+    #             )
+    #         )
+
+    # # Add relays
+    # for description in RELAY_ENTITY_DESCRIPTIONS:
+    #     device = await coordinator.get_device(description.key)
+    #     if device:
+    #         entities.append(
+    #             MannitoFarmingSwitch(
+    #                 coordinator=coordinator,
+    #                 entry_id=entry.entry_id,
+    #                 description=description,
+    #             )
+    #         )
+
+    # # Add pumps
+    # for description in PUMP_ENTITY_DESCRIPTIONS:
+    #     device = await coordinator.get_device(description.key)
+    #     if device:
+    #         entities.append(
+    #             MannitoFarmingSwitch(
+    #                 coordinator=coordinator,
+    #                 entry_id=entry.entry_id,
+    #                 description=description,
+    #             )
+    #         )
+
 
 
 class MannitoFarmingSwitch(CoordinatorEntity[MannitoFarmingDataUpdateCoordinator], SwitchEntity):
