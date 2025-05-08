@@ -9,7 +9,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.helpers.entity import DeviceInfo
-from .api import API, Device
+from .api import API, Device, Sensor
 from .const import DEFAULT_UPDATE_INTERVAL, DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
@@ -33,6 +33,7 @@ class MannitoFarmingDataUpdateCoordinator(DataUpdateCoordinator[Dict[str, Any]])
         self.session = async_get_clientsession(hass)
         self.api = API(self.host, self.username, self.password, self.session)
         self._devices: Dict[str, Device] = {}
+        self._sensors: Dict[str, Sensor] = {}
         self.device_info: Dict[str, Any] = {}
         
         _LOGGER.debug("Initializing coordinator for host: %s", self.host)
@@ -66,7 +67,13 @@ class MannitoFarmingDataUpdateCoordinator(DataUpdateCoordinator[Dict[str, Any]])
                 devices = await self.api.discover_devices()
                 for device in devices:
                     self._devices[device.device_id] = device
-            
+
+            if not self._sensors:
+                # First run, discover all devices
+                sensors = await self.api.discover_sensors()
+                for sensor in sensors:
+                    self._sensors[sensor.sensor_id] = sensor
+
             # Update all device states
             data = {}
             for device_id, device in self._devices.items():
@@ -79,6 +86,14 @@ class MannitoFarmingDataUpdateCoordinator(DataUpdateCoordinator[Dict[str, Any]])
                 if "speed" in state_data and device.speed is not None:
                     device.speed = state_data["speed"]
                 
+            for sensor_id, sensor in self._sensors.items():
+                sensor_data = await self.api.get_sensor_state(sensor_id)
+                data[sensor_id] = sensor_data
+                
+                # Update stored device state
+                if "state" in state_data:
+                    sensor.state_value = state_data["state"]
+
             return data
         except Exception as err:
             raise UpdateFailed(f"Error updating data: {err}")
@@ -101,7 +116,26 @@ class MannitoFarmingDataUpdateCoordinator(DataUpdateCoordinator[Dict[str, Any]])
             List of all devices
         """
         return list(self._devices.values())
+    
+    async def get_sensor(self, sensor_id: str) -> Optional[Sensor]:
+        """Get sensor information.
+        
+        Args:
+            sensor_id: Sensor ID to get
+            
+        Returns:
+            Sensor object if found, None otherwise
+        """
+        return self._sensors.get(sensor_id)
 
+    async def get_all_sensors(self) -> List[Sensor]:
+        """Get all sensors.
+        
+        Returns:
+            List of all sensors
+        """
+        return list(self._sensors.values())
+    
     async def async_set_device_state(self, device_id: str, state: bool) -> bool:
         """Set the state of a device.
         
@@ -164,5 +198,10 @@ class MannitoFarmingDataUpdateCoordinator(DataUpdateCoordinator[Dict[str, Any]])
             devices = await self.api.discover_devices()
             for device in devices:
                 self._devices[device.device_id] = device
+
+            sensors = await self.api.discover_sensors()
+            for sensor in sensors:
+                self._sensors[sensor.sensor_id] = sensor
+
         except Exception as err:
-            _LOGGER.error("Error discovering devices: %s", err)
+            _LOGGER.error("Error discovering devices and sensors: %s", err)

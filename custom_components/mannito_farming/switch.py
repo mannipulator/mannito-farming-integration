@@ -36,6 +36,20 @@ class MannitoFarmingSwitchEntityDescription(SwitchEntityDescription):
     icon_off: str | None = None
 
 
+
+SWITCH_DESCRIPTIONS_MAP = {
+    f"SOLENOID{i}": MannitoFarmingSwitchEntityDescription(
+        key=f"SOLENOID{i}",
+        translation_key="valve",
+        name=f"Valve {i}",
+        device_type=DEVICE_TYPE_VALVE,
+        icon_on="mdi:water",
+        icon_off="mdi:water-off",
+    )
+    for i in range(1, VALVE_COUNT + 1)
+}
+
+
 # Switch descriptions for valves
 VALVE_ENTITY_DESCRIPTIONS = [
     MannitoFarmingSwitchEntityDescription(
@@ -86,6 +100,20 @@ async def async_setup_entry(
 
     entities = []
 
+    discovered_devices = await coordinator.get_all_devices()
+    for device in discovered_devices:
+        descriptor: MannitoFarmingSwitchEntityDescription = SWITCH_DESCRIPTIONS_MAP[device.device_id]
+        if descriptor:
+            entities.append(
+                MannitoFarmingSwitch(
+                    coordinator=coordinator,
+                    entry=entry,
+                    device_id=device.device_id,
+                    description=descriptor,
+                    name=device.name,
+                )
+            )
+
     # Add valves
     for description in VALVE_ENTITY_DESCRIPTIONS:
         device = await coordinator.get_device(description.key)
@@ -134,14 +162,17 @@ class MannitoFarmingSwitch(CoordinatorEntity[MannitoFarmingDataUpdateCoordinator
     def __init__(
         self,
         coordinator: MannitoFarmingDataUpdateCoordinator,
-        entry_id: str,
+        entry: ConfigEntry,
+        device_id: str,
         description: MannitoFarmingSwitchEntityDescription,
+        name: str | None = None
     ) -> None:
         """Initialize the switch."""
         super().__init__(coordinator)
         self.entity_description = description
-        self._device_id = description.key
-        self._attr_unique_id = f"{entry_id}_{self._device_id}"
+        self._device_id = device_id
+        self._attr_unique_id = f"{entry.entry_id}_{self._device_id}"
+        self._attr_name = name
                 
     
     @property

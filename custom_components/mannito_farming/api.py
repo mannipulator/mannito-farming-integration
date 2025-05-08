@@ -18,6 +18,17 @@ class DeviceType(StrEnum):
     PUMP = "pump"
     OTHER = "other"
 
+class SensorType(StrEnum):
+    """Device types."""
+    HUMIDITY = "humidity"
+    TEMPERATURE = "temperature"
+    CO2 = "co2"
+    WATERLEVEL = "waterlevel"
+    WATERFLOW = "waterflow"
+    LEAF_TEMPERATURE="leaf_temperature"
+    PH = "ph"
+    EC = "ec"
+    OTHER = "other"
 
 @dataclass
 class Device:
@@ -29,6 +40,14 @@ class Device:
     state: bool = False
     speed: Optional[int] = None
 
+@dataclass
+class Sensor:
+    """Sensor information."""
+    sensor_id: str
+    sensor_unique_id: str
+    sensor_type: SensorType
+    name: str
+    state_value: str = ""
 
 class APIAuthError(Exception):
     """Exception for authentication errors."""
@@ -112,6 +131,26 @@ class API:
             _LOGGER.error("Error setting speed for %s: %s", component_name, err)
             return False
 
+
+    async def get_sensor_state(self, component_name: str) -> Dict[str, Any]:
+        """Get the state of a device.
+        
+        Args:
+            component_name: The name/ID of the component
+            
+        Returns:
+            Dictionary with device state information
+        """
+        url = f"http://{self.host}/api/sensor/{component_name}"
+        try:
+            async with self.session.get(url, auth=self.auth) as response:
+                if response.status == 200:
+                    return await response.json()
+                return {}
+        except Exception as err:
+            _LOGGER.error("Error getting state for %s: %s", component_name, err)
+            return {}
+
     async def get_device_state(self, component_name: str) -> Dict[str, Any]:
         """Get the state of a device.
         
@@ -157,6 +196,7 @@ class API:
             List of discovered devices
         """
         devices = []
+        sensors = []
         try:
             config = await self.fetch_device_config()
             
@@ -205,6 +245,36 @@ class API:
         except Exception as err:
             _LOGGER.error("Error discovering devices: %s", err)
             return []
+
+
+
+    async def discover_sensors(self) -> List[Sensor]:
+        """Discover available sensors.
+        
+        Returns:
+            List of discovered sensors
+        """
+    
+        sensors = []
+        try:
+            config = await self.fetch_device_config()
+            
+            # Process temp sensors (4x)
+            for i in range(1, 2):
+                sensor_id = f"TEMP{i}"
+                sensors.append(Sensor(
+                    sensor_id=sensor_id,
+                    sensor_unique_id=f"{self.host}_{sensor_id}",
+                    sensor_type=SensorType.HUMIDITY,
+                    name=f"Temperatur Sensor {i}"
+                ))
+                
+            return sensors
+        except Exception as err:
+            _LOGGER.error("Error discovering devices: %s", err)
+            return []
+
+
 
     async def get_device_info(self) -> Dict[str, Any]:
         """Return device information from the cached configuration data."""
