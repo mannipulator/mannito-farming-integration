@@ -27,14 +27,14 @@ class DeviceType(StrEnum):
             ValueError: If the string doesn't match any DeviceType
         """
         try:
-            return cls(value.capitalize())
+            return cls(value.upper())
         except ValueError:
             raise ValueError(f"'{value}' is not a valid DeviceType")
     FAN = "FAN"
     RELAY = "RELAY"
     SOLENOID = "SOLENOID"
     PUMP = "PUMP"
-    OTHER = "ÔTHER"
+    OTHER = "OTHER"
 
 class SensorType(StrEnum):
     """Device types."""
