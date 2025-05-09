@@ -46,6 +46,7 @@ class MannitoFarmingFanEntityDescription(FanEntityDescription):
 # Fan descriptions for the 10 fans
 FAN_DESCRIPTIONS_MAP = {
     f"FAN": MannitoFarmingFanEntityDescription(
+        key=f"FAN",
         translation_key="fan",
         device_type=DEVICE_TYPE_FAN,
         icon_on="mdi:fan",
