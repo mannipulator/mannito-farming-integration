@@ -90,6 +90,7 @@ class MannitoFarmingDataUpdateCoordinator(DataUpdateCoordinator[Dict[str, Any]])
                 sensor_data = await self.api.get_sensor_state(sensor_id)
                 data[sensor_id] = sensor_data
                 
+                _LOGGER.debug("Mannito-Sensor data: %s", sensor_data)
                 # Update stored sensor value
                 if "value" in sensor_data:
                     sensor.state_value = state_data["value"]
