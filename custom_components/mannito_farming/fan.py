@@ -39,7 +39,8 @@ class MannitoFarmingFanEntityDescription(FanEntityDescription):
     """Entity description for Mannito Farming fans."""
 
     device_type: str = DEVICE_TYPE_FAN
-    icon: str = "mdi:fan"
+    icon_on: str | None = None
+    icon_off: str | None = None
 
 
 # Fan descriptions for the 10 fans
