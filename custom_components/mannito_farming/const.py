@@ -7,7 +7,7 @@ from homeassistant.const import Platform
 DOMAIN: Final = "mannito_farming"
 
 # Platforms
-PLATFORMS: Final = [Platform.SWITCH, Platform.FAN]
+PLATFORMS: Final = [Platform.SWITCH, Platform.FAN, Platform.SENSOR]
 
 # Configuration
 CONF_DEVICE_ID: Final = "device_id"

@@ -95,14 +95,17 @@ class MannitoFarmingFan(CoordinatorEntity[MannitoFarmingDataUpdateCoordinator], 
     def __init__(
         self,
         coordinator: MannitoFarmingDataUpdateCoordinator,
-        entry_id: str,
+        entry: ConfigEntry,
+        device_id: str,
         description: MannitoFarmingFanEntityDescription,
+        name: str | None = None
     ) -> None:
         """Initialize the fan."""
         super().__init__(coordinator)
         self.entity_description = description
-        self._device_id = description.key
-        self._attr_unique_id = f"{entry_id}_{self._device_id}"
+        self._device_id = device_id
+        self._attr_unique_id = f"{entry.entry_id}_{self._device_id}"
+        self._attr_name = name
 
 
     @property

@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import logging
 
 from datetime import datetime
 from typing import Any
@@ -26,6 +27,7 @@ from .api import Device, DeviceType, Sensor, SensorType
 from .const import DOMAIN
 from .coordinator import MannitoFarmingDataUpdateCoordinator
 
+_LOGGER = logging.getLogger(__name__)
 
 @dataclass
 class MannitoFarmingSensorEntityDescription(SensorEntityDescription):
@@ -97,8 +99,9 @@ async def async_setup_entry(
     entities = []
     
     discovered_sensor = await coordinator.get_all_sensors()
+    _LOGGER.debug("Discovered sensors: %s", discovered_sensor)
     for sensor in discovered_sensor:
-        descriptor: MannitoFarmingSensorEntityDescription = SENSOR_DESCRIPTIONS_MAP[sensor.sensor_type]
+        descriptor: MannitoFarmingSensorEntityDescription = SENSOR_DESCRIPTIONS_MAP.get(sensor.sensor_type)
 
         if descriptor:
             entities.append(
