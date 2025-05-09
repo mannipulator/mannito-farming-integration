@@ -115,7 +115,7 @@ async def async_setup_entry(
     discovered_devices = await coordinator.get_all_devices()
     _LOGGER.debug("Discovered switch-devices: %s", discovered_devices)
     for device in discovered_devices:
-        descriptor: MannitoFarmingSwitchEntityDescription = SWITCH_DESCRIPTIONS_MAP[device.device_type]
+        descriptor: MannitoFarmingSwitchEntityDescription = SWITCH_DESCRIPTIONS_MAP.get(device.device_type)
         if descriptor:
             entities.append(
                 MannitoFarmingSwitch(

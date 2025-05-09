@@ -68,7 +68,7 @@ async def async_setup_entry(
     _LOGGER.debug("Discovered devices: %s", discovered_devices)
     # Add fans
     for device in discovered_devices:
-        descriptor: MannitoFarmingFanEntityDescription = FAN_DESCRIPTIONS_MAP[device.device_id]
+        descriptor: MannitoFarmingFanEntityDescription = FAN_DESCRIPTIONS_MAP.get(device.device_type)
         if descriptor:
             entities.append(
                 MannitoFarmingFan(
