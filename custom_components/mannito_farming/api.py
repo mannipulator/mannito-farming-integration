@@ -222,53 +222,54 @@ class API:
             deviceList=config.get("devices"),
             
             for device in deviceList:
+                deviceid=device.get("device_id")
                 devices.append(Device(
-                    device_id=device.get("device_id"),
-                    device_unique_id=f"{self.host}_{device_id}",
+                    device_id=deviceid,
+                    device_unique_id=f"{self.host}_{deviceid}",
                     device_type=DeviceType.SOLENOID,
-                    device_id=device.get("device_name"),
+                    name=device.get("device_name"),
                 ))
 
             # Process valves (5x)
-            for i in range(1, 6):
+            # for i in range(1, 6):
                 
-                devices.append(Device(
-                    device_id=device_id,
-                    device_unique_id=f"{self.host}_{device_id}",
-                    device_type=DeviceType.SOLENOID,
-                    name=f"Valve {i}"
-                ))
+            #     devices.append(Device(
+            #         device_id=device_id,
+            #         device_unique_id=f"{self.host}_{device_id}",
+            #         device_type=DeviceType.SOLENOID,
+            #         name=f"Valve {i}"
+            #     ))
             
-            # Process fans (10x)
-            for i in range(1, 11):
-                device_id = f"FAN{i}"
-                devices.append(Device(
-                    device_id=device_id,
-                    device_unique_id=f"{self.host}_{device_id}",
-                    device_type=DeviceType.FAN,
-                    name=f"Fan {i}",
-                    speed=0
-                ))
+            # # Process fans (10x)
+            # for i in range(1, 11):
+            #     device_id = f"FAN{i}"
+            #     devices.append(Device(
+            #         device_id=device_id,
+            #         device_unique_id=f"{self.host}_{device_id}",
+            #         device_type=DeviceType.FAN,
+            #         name=f"Fan {i}",
+            #         speed=0
+            #     ))
             
-            # Process relays (8x)
-            for i in range(1, 9):
-                device_id = f"RELAY{i}"
-                devices.append(Device(
-                    device_id=device_id,
-                    device_unique_id=f"{self.host}_{device_id}",
-                    device_type=DeviceType.RELAY,
-                    name=f"Relay {i}"
-                ))
+            # # Process relays (8x)
+            # for i in range(1, 9):
+            #     device_id = f"RELAY{i}"
+            #     devices.append(Device(
+            #         device_id=device_id,
+            #         device_unique_id=f"{self.host}_{device_id}",
+            #         device_type=DeviceType.RELAY,
+            #         name=f"Relay {i}"
+            #     ))
             
-            # Process pumps (4x)
-            for i in range(1, 5):
-                device_id = f"PUMP{i}"
-                devices.append(Device(
-                    device_id=device_id,
-                    device_unique_id=f"{self.host}_{device_id}",
-                    device_type=DeviceType.PUMP,
-                    name=f"Pump {i}"
-                ))
+            # # Process pumps (4x)
+            # for i in range(1, 5):
+            #     device_id = f"PUMP{i}"
+            #     devices.append(Device(
+            #         device_id=device_id,
+            #         device_unique_id=f"{self.host}_{device_id}",
+            #         device_type=DeviceType.PUMP,
+            #         name=f"Pump {i}"
+            #     ))
                 
             return devices
         except Exception as err:
