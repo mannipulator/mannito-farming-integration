@@ -44,8 +44,21 @@ SWITCH_DESCRIPTIONS_MAP = {
         device_type=DEVICE_TYPE_VALVE,
         icon_on="mdi:water",
         icon_off="mdi:water-off",
-    )
-    
+    ),
+    f"RELAY": MannitoFarmingSwitchEntityDescription(
+        translation_key="relay",
+        key = f"RELAY",
+        device_type=DEVICE_TYPE_RELAY,
+        icon_on="mdi:power-plug",
+        icon_off="mdi:power-plug-off",
+    ),
+    f"PUMP": MannitoFarmingSwitchEntityDescription(
+        translation_key="pump",
+        key = f"PUMP",
+        device_type=DEVICE_TYPE_PUMP,
+        icon_on="mdi:pump",
+        icon_off="mdi:pump-off",
+    )    
 }
 
 
@@ -102,7 +115,7 @@ async def async_setup_entry(
     discovered_devices = await coordinator.get_all_devices()
     _LOGGER.debug("Discovered switch-devices: %s", discovered_devices)
     for device in discovered_devices:
-        descriptor: MannitoFarmingSwitchEntityDescription = SWITCH_DESCRIPTIONS_MAP[device.device_id]
+        descriptor: MannitoFarmingSwitchEntityDescription = SWITCH_DESCRIPTIONS_MAP[device.device_type]
         if descriptor:
             entities.append(
                 MannitoFarmingSwitch(
