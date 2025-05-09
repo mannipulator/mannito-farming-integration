@@ -219,10 +219,10 @@ class API:
         sensors = []
         try:
             config = await self.fetch_device_config()
-            deviceList=config.get("devices"),
+            deviceList = config.get("devices", [])
             
             for device in deviceList:
-                deviceid=device.get("device_id")
+                deviceid = device.get("device_id")
                 device_type_str = device.get("device_type", "OTHER")
                 try:
                     device_type = DeviceType.parse(device_type_str)
