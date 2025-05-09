@@ -38,15 +38,34 @@ class DeviceType(StrEnum):
 
 class SensorType(StrEnum):
     """Device types."""
-    HUMIDITY = "humidity"
-    TEMPERATURE = "temperature"
-    CO2 = "co2"
-    WATERLEVEL = "waterlevel"
-    WATERFLOW = "waterflow"
-    LEAF_TEMPERATURE="leaf_temperature"
-    PH = "ph"
-    EC = "ec"
-    OTHER = "other"
+
+    @classmethod
+    def parse(cls, value: str) -> "SensorType":
+        """Parse a string into a DeviceType enum.
+        
+        Args:
+            value: The string to parse
+            
+        Returns:
+            The corresponding DeviceType enum value
+            
+        Raises:
+            ValueError: If the string doesn't match any DeviceType
+        """
+        try:
+            return cls(value.upper())
+        except ValueError:
+            raise ValueError(f"'{value}' is not a valid DeviceType")
+
+    HUMIDITY = "HUMIDITY"
+    TEMPERATURE = "TEMPERATURE"
+    CO2 = "CO2"
+    WATERLEVEL = "WATERLEVEL"
+    WATERFLOW = "WATERFLOW"
+    LEAF_TEMPERATURE="LEAF_TEMPERATURE"
+    PH = "PH"
+    EC = "EC"
+    OTHER = "OTHER"
 
 
 
@@ -294,16 +313,23 @@ class API:
     
         sensors = []
         try:
-            config = await self.fetch_device_config()
+            config = await self.fetch_device_config()            
+            sensorList = config.get("sensors", [])
             
-            # Process temp sensors (4x)
-            for i in range(1, 2):
-                sensor_id = f"TEMP{i}"
+            for sensor in sensorList:
+                sensorid = sensor.get("sensor_id")
+                sensor_type_str = sensor.get("sensor_type", "OTHER")
+                try:
+                    sensor_type = SensorType.parse(sensor_type_str)
+                except ValueError:
+                    _LOGGER.warning("Unknown sensor type: %s, using OTHER", sensor_type_str)
+                    sensor_type = SensorType.OTHER
+                    
                 sensors.append(Sensor(
-                    sensor_id=sensor_id,
-                    sensor_unique_id=f"{self.host}_{sensor_id}",
-                    sensor_type=SensorType.HUMIDITY,
-                    name=f"Temperatur Sensor {i}"
+                    sensor_id=sensorid,
+                    sensor_unique_id=f"{self.host}_{sensorid}",
+                    sensor_type=sensor_type,
+                    name=sensor.get("sensor_name"),
                 ))
                 
             return sensors
