@@ -93,7 +93,7 @@ class MannitoFarmingDataUpdateCoordinator(DataUpdateCoordinator[Dict[str, Any]])
                 _LOGGER.debug("Mannito-Sensor data: %s", sensor_data)
                 # Update stored sensor value
                 if "value" in sensor_data:
-                    sensor.state_value = state_data["value"]
+                    sensor.state_value = sensor_data["value"]
 
             return data
         except Exception as err:
