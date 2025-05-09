@@ -39,7 +39,6 @@ class MannitoFarmingSwitchEntityDescription(SwitchEntityDescription):
 
 SWITCH_DESCRIPTIONS_MAP = {
     f"SOLENOID": MannitoFarmingSwitchEntityDescription(
-        key=f"SOLENOID{i}",
         translation_key="valve",
         device_type=DEVICE_TYPE_VALVE,
         icon_on="mdi:water",
