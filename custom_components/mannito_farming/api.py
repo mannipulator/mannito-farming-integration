@@ -223,10 +223,17 @@ class API:
             
             for device in deviceList:
                 deviceid=device.get("device_id")
+                device_type_str = device.get("device_type", "OTHER")
+                try:
+                    device_type = DeviceType.parse(device_type_str)
+                except ValueError:
+                    _LOGGER.warning("Unknown device type: %s, using OTHER", device_type_str)
+                    device_type = DeviceType.OTHER
+                    
                 devices.append(Device(
                     device_id=deviceid,
                     device_unique_id=f"{self.host}_{deviceid}",
-                    device_type=DeviceType.SOLENOID,
+                    device_type=device_type,
                     name=device.get("device_name"),
                 ))
 
