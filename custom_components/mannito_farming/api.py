@@ -166,6 +166,7 @@ class API:
         _LOGGER.debug("Setting fan speed for %s to %d", component_name, speed)
 
         url = f"http://{self.host}/api/device/{component_name}/value/{speed}"
+        _LOGGER.debug("Setting fan speed URL: %s", url)
         try:
             async with self.session.post(url, auth=self.auth) as response:
                 return response.status == 200
