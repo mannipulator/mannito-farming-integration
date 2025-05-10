@@ -146,8 +146,7 @@ class MannitoFarmingSensor(CoordinatorEntity[MannitoFarmingDataUpdateCoordinator
     @property
     def device_info(self) -> DeviceInfo:
         """Return the device info."""
-        api_device_info = self.coordinator.get_device_info()
-        # _LOGGER.debug("Device info: %s", api_device_info)
+        api_device_info = self.coordinator.get_device_info()        
         return api_device_info
 
     @property
@@ -158,17 +157,4 @@ class MannitoFarmingSensor(CoordinatorEntity[MannitoFarmingDataUpdateCoordinator
             _LOGGER.debug("Fetching sensor value for %s: %s", self._device_id, sensor.state_value)
             return sensor.state_value
         return None
-
-    # async def async_update(self) -> None:
-    #     """Update the sensor state."""
-    #     _LOGGER.debug("Mannito-Sensor async_update start")
-    #     sensor = self.coordinator._sensors.get(self._device_id)
-    #     if sensor:
-    #         _LOGGER.debug("Setting mannito-Sensor data: %s", sensor)
-    #         self._attr_native_value = sensor.state_value
-        
-    #     _LOGGER.debug("Mannito-Sensor async_update: %s", self._attr_native_value)
-
-        # state = await self.coordinator.async_fetch_device_state(self._device_id)
-        # self._attr_native_value = state.get("value")
 

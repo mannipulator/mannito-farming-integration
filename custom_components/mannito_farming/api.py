@@ -162,7 +162,7 @@ class API:
         Returns:
             True if successful, False otherwise
         """
-        url = f"http://{self.host}/api/device/{component_name}/speed/{speed}"
+        url = f"http://{self.host}/api/device/{component_name}/value/{speed}"
         try:
             async with self.session.post(url, auth=self.auth) as response:
                 return response.status == 200
