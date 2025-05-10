@@ -162,6 +162,9 @@ class API:
         Returns:
             True if successful, False otherwise
         """
+
+        _LOGGER.debug("Setting fan speed for %s to %d", component_name, speed)
+
         url = f"http://{self.host}/api/device/{component_name}/value/{speed}"
         try:
             async with self.session.post(url, auth=self.auth) as response:

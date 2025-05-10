@@ -163,6 +163,9 @@ class MannitoFarmingDataUpdateCoordinator(DataUpdateCoordinator[Dict[str, Any]])
         Returns:
             True if successful, False otherwise
         """
+
+        _LOGGER.debug("Setting fan speed for device %s to %d", device_id, speed)
+
         success = await self.api.set_fan_speed(device_id, speed)
         if success and device_id in self._devices:
             device = self._devices[device_id]
