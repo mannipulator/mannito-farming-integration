@@ -327,7 +327,6 @@ class API:
             raise APIConnectionError("Error discovering devices")
 
 
-
     async def discover_sensors(self) -> List[Sensor]:
         """Discover available sensors.
         
@@ -383,13 +382,3 @@ class API:
             "configuration_url": f"http://{self.host}",
             "name": self.device_info.get("name", f"Mannito Farming {self.host}"),
         }
-
-# Example of what the `device_info` object might contain:
-# {
-#     "model": "Farming Controller v1.0",
-#     "firmware_version": "1.2.3",
-#     "serial_number": "12345-ABCDE",
-#     "manufacturer": "Mannito",
-#     "uptime": "72 hours",
-#     "ip_address": "192.168.1.100"
-# }

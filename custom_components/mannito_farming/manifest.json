@@ -4,12 +4,12 @@
   "codeowners": [],
   "config_flow": true,
   "dependencies": ["zeroconf"],
-  "documentation": "https://github.com/yourusername/mannito-farming",
+  "documentation": "https://github.com/mannipulator/mannito-farming-integration",
   "homekit": {},
   "integration_type": "device",
   "iot_class": "local_polling",
   "requirements": ["aiohttp>=3.8.0"],
-  "version": "0.2.0",  
+  "version": "0.2.1",  
   "zeroconf": ["_mannitofarming._tcp.local.", "_http._tcp.local."],
   "loggers": ["custom_components.mannito_farming"]
 }
