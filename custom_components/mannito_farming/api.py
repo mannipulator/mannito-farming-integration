@@ -194,7 +194,7 @@ class API:
                 return {}
         except Exception as err:
             _LOGGER.error("Error getting state for %s: %s", component_name, err)
-            return {}
+            raise APIConnectionError(f"Error getting state for {component_name}: {err}")
 
     async def get_device_state(self, component_name: str) -> Dict[str, Any]:
         """Get the state of a device.
@@ -213,7 +213,7 @@ class API:
                 return {}
         except Exception as err:
             _LOGGER.error("Error getting state for %s: %s", component_name, err)
-            return {}
+            raise APIConnectionError(f"Error getting state for {component_name}: {err}")
 
     async def fetch_device_config(self) -> Dict[str, Any]:
         """Fetch the device configuration from the API.
@@ -261,52 +261,11 @@ class API:
                     device_type=device_type,
                     name=device.get("device_name"),
                 ))
-
-            # Process valves (5x)
-            # for i in range(1, 6):
-                
-            #     devices.append(Device(
-            #         device_id=device_id,
-            #         device_unique_id=f"{self.host}_{device_id}",
-            #         device_type=DeviceType.SOLENOID,
-            #         name=f"Valve {i}"
-            #     ))
-            
-            # # Process fans (10x)
-            # for i in range(1, 11):
-            #     device_id = f"FAN{i}"
-            #     devices.append(Device(
-            #         device_id=device_id,
-            #         device_unique_id=f"{self.host}_{device_id}",
-            #         device_type=DeviceType.FAN,
-            #         name=f"Fan {i}",
-            #         speed=0
-            #     ))
-            
-            # # Process relays (8x)
-            # for i in range(1, 9):
-            #     device_id = f"RELAY{i}"
-            #     devices.append(Device(
-            #         device_id=device_id,
-            #         device_unique_id=f"{self.host}_{device_id}",
-            #         device_type=DeviceType.RELAY,
-            #         name=f"Relay {i}"
-            #     ))
-            
-            # # Process pumps (4x)
-            # for i in range(1, 5):
-            #     device_id = f"PUMP{i}"
-            #     devices.append(Device(
-            #         device_id=device_id,
-            #         device_unique_id=f"{self.host}_{device_id}",
-            #         device_type=DeviceType.PUMP,
-            #         name=f"Pump {i}"
-            #     ))
                 
             return devices
         except Exception as err:
             _LOGGER.error("Error discovering devices: %s", err)
-            return []
+            raise APIConnectionError("Error discovering devices")
 
 
 

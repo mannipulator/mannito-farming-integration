@@ -11,6 +11,7 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity import DeviceInfo, EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
+from homeassistant.const import STATE_UNAVAILABLE
 
 from .api import DeviceType
 from .const import (
@@ -200,6 +201,14 @@ class MannitoFarmingSwitch(CoordinatorEntity[MannitoFarmingDataUpdateCoordinator
         device = self.coordinator._devices.get(self._device_id)
         # Check both coordinator update success and device-specific availability
         return self.coordinator.last_update_success and (device and device.available)
+
+    @property
+    def state(self):
+        """Return the state of the sensor."""
+        if not self.available:
+            return STATE_UNAVAILABLE
+        return self.coordinator.data[self._device_id][self._sensor_type]
+
 
     @property
     def device_info(self) -> DeviceInfo:
