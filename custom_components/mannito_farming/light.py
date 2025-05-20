@@ -52,7 +52,9 @@ class GrowControllerLight(LightEntity):
         self._attr_name = name
         self._attr_unique_id = f"{entry.entry_id}_{device_id}"
         self._attr_is_on = False
-        self._attr_brightness = 0    @property
+        self._attr_brightness = 0    
+        
+    @property
     def available(self) -> bool:
         """Return if entity is available."""
         device = self.coordinator._devices.get(self._device_id)

@@ -114,7 +114,9 @@ class MannitoFarmingFan(CoordinatorEntity[MannitoFarmingDataUpdateCoordinator], 
         device = self.coordinator._devices.get(self._device_id)
         if device:
             return device.state
-        return False    @property
+        return False    
+    
+    @property
     def available(self) -> bool:
         """Return if entity is available."""
         device = self.coordinator._devices.get(self._device_id)
