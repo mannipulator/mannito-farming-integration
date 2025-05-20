@@ -186,15 +186,14 @@ class MannitoFarmingSwitch(CoordinatorEntity[MannitoFarmingDataUpdateCoordinator
         self._device_id = device_id
         self._attr_unique_id = f"{entry.entry_id}_{self._device_id}"
         self._attr_name = name
-                
-    
+
     @property
     def icon(self) -> str | None:
         """Return the icon to use in the frontend."""
         if self.is_on:
             return self.entity_description.icon_on
-        return self.entity_description.icon_off    
-    
+        return self.entity_description.icon_off
+        
     @property
     def available(self) -> bool:
         """Return if entity is available."""
