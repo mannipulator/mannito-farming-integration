@@ -95,6 +95,7 @@ class MannitoFarmingDataUpdateCoordinator(DataUpdateCoordinator[Dict[str, Any]])
                     # If an error occurred, the device is not available
                     device.available = False
                     _LOGGER.error("Error updating device %s: %s", device_id, err)
+                    raise UpdateFailed(f"Error updating data: {err}")
                 
             for sensor_id, sensor in self._sensors.items():
                 try:
@@ -118,6 +119,7 @@ class MannitoFarmingDataUpdateCoordinator(DataUpdateCoordinator[Dict[str, Any]])
                     # If an error occurred, the sensor is not available
                     sensor.available = False
                     _LOGGER.error("Error updating sensor %s: %s", sensor_id, err)
+                    raise UpdateFailed(f"Error updating data: {err}")
 
             return data
         except Exception as err:
