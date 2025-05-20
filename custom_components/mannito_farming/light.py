@@ -52,12 +52,12 @@ class GrowControllerLight(LightEntity):
         self._attr_name = name
         self._attr_unique_id = f"{entry.entry_id}_{device_id}"
         self._attr_is_on = False
-        self._attr_brightness = 0
-
-    @property
+        self._attr_brightness = 0    @property
     def available(self) -> bool:
         """Return if entity is available."""
-        return self.coordinator.last_update_success
+        device = self.coordinator._devices.get(self._device_id)
+        # Check both coordinator update success and device-specific availability
+        return self.coordinator.last_update_success and (device and device.available)
 
     async def async_turn_on(self, **kwargs: Any) -> None:
         """Turn the light on."""

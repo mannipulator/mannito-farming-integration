@@ -72,29 +72,52 @@ class MannitoFarmingDataUpdateCoordinator(DataUpdateCoordinator[Dict[str, Any]])
                 # First run, discover all devices
                 sensors = await self.api.discover_sensors()
                 for sensor in sensors:
-                    self._sensors[sensor.sensor_id] = sensor
-
-            # Update all device states
+                    self._sensors[sensor.sensor_id] = sensor            # Update all device states
             data = {}
             for device_id, device in self._devices.items():
-                state_data = await self.api.get_device_state(device_id)
-                data[device_id] = state_data
-                
-                # Update stored device state
-                if "state" in state_data:
-                    device.state = state_data["state"]
-                if "speed" in state_data and device.speed is not None:
-                    device.speed = state_data["speed"]
+                try:
+                    state_data = await self.api.get_device_state(device_id)
+                    data[device_id] = state_data
+                    
+                    # If we got a response with data, the device is available
+                    if state_data:
+                        device.available = True
+                        # Update stored device state
+                        if "state" in state_data:
+                            device.state = state_data["state"]
+                        if "speed" in state_data and device.speed is not None:
+                            device.speed = state_data["speed"]
+                    else:
+                        # Empty response means the device is not available
+                        device.available = False
+                        _LOGGER.warning("Device %s is not responding, marking as unavailable", device_id)
+                except Exception as err:
+                    # If an error occurred, the device is not available
+                    device.available = False
+                    _LOGGER.error("Error updating device %s: %s", device_id, err)
                 
             for sensor_id, sensor in self._sensors.items():
-                sensor_data = await self.api.get_sensor_state(sensor_id)
-                data[sensor_id] = sensor_data
-                
-                _LOGGER.debug("Mannito-Sensor data: %s", sensor_data)
-                # Update stored sensor value
-                if "value" in sensor_data:
-                    if "is_valid" in sensor_data and sensor_data["is_valid"]:
-                        sensor.state_value = sensor_data["value"]
+                try:
+                    sensor_data = await self.api.get_sensor_state(sensor_id)
+                    data[sensor_id] = sensor_data
+                    
+                    _LOGGER.debug("Mannito-Sensor data: %s", sensor_data)
+                    
+                    # If we got a valid response, the sensor is available
+                    if sensor_data:
+                        sensor.available = True
+                        # Update stored sensor value
+                        if "value" in sensor_data:
+                            if "is_valid" in sensor_data and sensor_data["is_valid"]:
+                                sensor.state_value = sensor_data["value"]
+                    else:
+                        # Empty response means the sensor is not available
+                        sensor.available = False
+                        _LOGGER.warning("Sensor %s is not responding, marking as unavailable", sensor_id)
+                except Exception as err:
+                    # If an error occurred, the sensor is not available
+                    sensor.available = False
+                    _LOGGER.error("Error updating sensor %s: %s", sensor_id, err)
 
             return data
         except Exception as err:

@@ -136,12 +136,12 @@ class MannitoFarmingSensor(CoordinatorEntity[MannitoFarmingDataUpdateCoordinator
         self.entity_description = description
         self._device_id = device_id
         self._attr_name = name
-        self._attr_unique_id = f"{entry.entry_id}_{device_id}_sensor"
-
-    @property
+        self._attr_unique_id = f"{entry.entry_id}_{device_id}_sensor"    @property
     def available(self) -> bool:
         """Return if entity is available."""
-        return self.coordinator.last_update_success
+        sensor = self.coordinator._sensors.get(self._device_id)
+        # Check both coordinator update success and sensor-specific availability
+        return self.coordinator.last_update_success and (sensor and sensor.available)
 
     @property
     def device_info(self) -> DeviceInfo:

@@ -78,6 +78,7 @@ class Device:
     name: str
     state: bool = False
     speed: Optional[int] = None
+    available: bool = True  # Track device availability
 
 @dataclass
 class Sensor:
@@ -87,6 +88,7 @@ class Sensor:
     sensor_type: SensorType
     name: str
     state_value: str = ""
+    available: bool = True  # Track sensor availability
 
 class APIAuthError(Exception):
     """Exception for authentication errors."""
