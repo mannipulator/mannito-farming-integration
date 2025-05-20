@@ -10,6 +10,8 @@ from aiohttp import ClientSession, BasicAuth
 _LOGGER = logging.getLogger(__name__)
 
 
+
+
 class DeviceType(StrEnum):
     """Device types."""
     
@@ -67,7 +69,43 @@ class SensorType(StrEnum):
     EC = "EC"
     OTHER = "OTHER"
 
+class PluginType(StrEnum):
+    """Plugin types."""
+    
+    @classmethod
+    def parse(cls, value: str) -> "PluginType":
+        """Parse a string into a PluginType enum.
+        
+        Args:
+            value: The string to parse
+            
+        Returns:
+            The corresponding PluginType enum value
+            
+        Raises:
+            ValueError: If the string doesn't match any PluginType
+        """
+        try:
+            return cls(value.upper())
+        except ValueError:
+            raise ValueError(f"'{value}' is not a valid PluginType")
 
+    LIGHT_SCHEDULER = "LIGHT_SCHEDULER"
+    DEVICE_SCHEDULER = "DEVICE_SCHEDULER"
+    TEMPERATURE_CONTROLLER = "TEMPERATURE_CONTROLLER"
+    WIND_SIMULATOR = "WIND_SIMULATOR"
+    WATER_CONTROLLER = "WATER_CONTROLLER"
+    OTHER = "OTHER"
+
+@dataclass
+class Plugin:
+    """Plugin information."""
+    plugin_id: str
+    plugin_unique_id: str
+    plugin_type: PluginType
+    name: str
+    state: bool = False    
+    available: bool = True
 
 @dataclass
 class Device:
@@ -78,7 +116,7 @@ class Device:
     name: str
     state: bool = False
     speed: Optional[int] = None
-    available: bool = True  # Track device availability
+    available: bool = True
 
 @dataclass
 class Sensor:
@@ -88,7 +126,7 @@ class Sensor:
     sensor_type: SensorType
     name: str
     state_value: str = ""
-    available: bool = True  # Track sensor availability
+    available: bool = True
 
 class APIAuthError(Exception):
     """Exception for authentication errors."""
@@ -177,6 +215,26 @@ class API:
             return False
 
 
+    async def get_plugin_state(self, plugin_name: str) -> Dict[str, Any]:
+        """Get the state of a device.
+        
+        Args:
+            plugin_name: The name/ID of the plugin
+            
+        Returns:
+            Dictionary with plugin state information
+        """
+        url = f"http://{self.host}/api/plugin/{plugin_name}"
+        try:
+            async with self.session.get(url, auth=self.auth) as response:
+                if response.status == 200:
+                    return await response.json()
+                return {}
+        except Exception as err:
+            _LOGGER.error("Error getting state for %s: %s", plugin_name, err)
+            raise APIConnectionError(f"Error getting state for {plugin_name}: {err}")
+
+
     async def get_sensor_state(self, component_name: str) -> Dict[str, Any]:
         """Get the state of a device.
         
@@ -242,6 +300,7 @@ class API:
         """
         devices = []
         sensors = []
+        plugins = []
         try:
             config = await self.fetch_device_config()
             deviceList = config.get("devices", [])
