@@ -6,6 +6,15 @@
 
 This custom integration enables seamless control and monitoring of Mannito Farming controllers through Home Assistant. Transform your smart farming setup into a fully integrated home automation system with comprehensive device management and real-time monitoring capabilities.
 
+## 📚 Documentation
+
+Comprehensive documentation is available for developers, users, and AI assistants:
+
+- **[Architecture Documentation](ARCHITECTURE_DOCUMENTATION.md)** - Complete system overview, class documentation, and integration workflow
+- **[Controller API Specification](CONTROLLER_API_SPECIFICATION.md)** - Required API endpoints for mannito-controller implementation
+- **[Class Reference](CLASS_REFERENCE.md)** - Quick reference for all classes, methods, and data structures
+- **[AI Assistant Integration Guide](AI_ASSISTANT_INTEGRATION_GUIDE.md)** - Essential guide for AI assistants working on the mannito-controller system
+
 ## Overview
 
 The Mannito Farming Integration bridges the gap between your agricultural automation systems and Home Assistant, providing unified control over irrigation, ventilation, lighting, and environmental monitoring. Whether you're managing a greenhouse, hydroponic system, or indoor growing operation, this integration offers professional-grade automation with the familiar Home Assistant interface.
