@@ -8,19 +8,18 @@ from typing import Any
 from homeassistant.components.switch import SwitchEntity, SwitchEntityDescription
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
-from homeassistant.helpers.entity import DeviceInfo, EntityCategory
+from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .api import DeviceType
 from .const import (
-    DOMAIN,
-    VALVE_COUNT,
-    RELAY_COUNT,
-    PUMP_COUNT,
-    DEVICE_TYPE_VALVE,
-    DEVICE_TYPE_RELAY,
     DEVICE_TYPE_PUMP,
+    DEVICE_TYPE_RELAY,
+    DEVICE_TYPE_VALVE,
+    DOMAIN,
+    PUMP_COUNT,
+    RELAY_COUNT,
+    VALVE_COUNT,
 )
 from .coordinator import MannitoFarmingDataUpdateCoordinator
 
@@ -38,27 +37,27 @@ class MannitoFarmingSwitchEntityDescription(SwitchEntityDescription):
 
 
 SWITCH_DESCRIPTIONS_MAP = {
-    f"SOLENOID": MannitoFarmingSwitchEntityDescription(
+    "SOLENOID": MannitoFarmingSwitchEntityDescription(
         translation_key="valve",
-        key = f"SOLENOID",
+        key = "SOLENOID",
         device_type=DEVICE_TYPE_VALVE,
         icon_on="mdi:water",
         icon_off="mdi:water-off",
     ),
-    f"RELAY": MannitoFarmingSwitchEntityDescription(
+    "RELAY": MannitoFarmingSwitchEntityDescription(
         translation_key="relay",
-        key = f"RELAY",
+        key = "RELAY",
         device_type=DEVICE_TYPE_RELAY,
         icon_on="mdi:power-plug",
         icon_off="mdi:power-plug-off",
     ),
-    f"PUMP": MannitoFarmingSwitchEntityDescription(
+    "PUMP": MannitoFarmingSwitchEntityDescription(
         translation_key="pump",
-        key = f"PUMP",
+        key = "PUMP",
         device_type=DEVICE_TYPE_PUMP,
         icon_on="mdi:pump",
         icon_off="mdi:pump-off",
-    )    
+    )
 }
 
 
@@ -193,7 +192,7 @@ class MannitoFarmingSwitch(CoordinatorEntity[MannitoFarmingDataUpdateCoordinator
         if self.is_on:
             return self.entity_description.icon_on
         return self.entity_description.icon_off
-        
+
     @property
     def available(self) -> bool:
         """Return if entity is available."""

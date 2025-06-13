@@ -2,11 +2,12 @@
 from homeassistant.components.zeroconf import ZeroconfServiceInfo
 from homeassistant.config_entries import ConfigFlow
 from homeassistant.const import CONF_HOST, CONF_NAME
+
 from .const import DOMAIN
+
 
 async def async_setup_zeroconf(hass):
     """Set up Zeroconf discovery."""
-    pass
 
 class MannitoFarmingConfigFlow(ConfigFlow, domain=DOMAIN):
     """Handle Zeroconf discovery for Mannito Farming."""

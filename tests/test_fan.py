@@ -1,7 +1,9 @@
 from unittest.mock import AsyncMock, patch
+
 import pytest
-from homeassistant.components.fan import FanEntity
+
 from custom_components.mannito_farming.fan import GrowControllerFan
+
 
 @pytest.fixture
 def mock_coordinator():

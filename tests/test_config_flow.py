@@ -4,8 +4,9 @@ from unittest.mock import AsyncMock, patch
 import pytest
 from homeassistant import config_entries
 from homeassistant.data_entry_flow import FlowResultType
-from custom_components.mannito_farming.const import DOMAIN
+
 from custom_components.mannito_farming.api import APIConnectionError
+from custom_components.mannito_farming.const import DOMAIN
 
 
 @pytest.fixture
