@@ -1,29 +1,23 @@
 """Sensor platform for Grow Controller."""
 from __future__ import annotations
 
-from dataclasses import dataclass
 import logging
-
-from datetime import datetime
-from typing import Any
+from dataclasses import dataclass
 
 from homeassistant.components.sensor import (
     SensorDeviceClass,
     SensorEntity,
     SensorEntityDescription,
     SensorStateClass,
-    UnitOfTemperature
+    UnitOfTemperature,
 )
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import (
-    PERCENTAGE
-)
+from homeassistant.const import PERCENTAGE
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .api import Device, DeviceType, Sensor, SensorType
 from .const import DOMAIN
 from .coordinator import MannitoFarmingDataUpdateCoordinator
 
@@ -36,55 +30,55 @@ class MannitoFarmingSensorEntityDescription(SensorEntityDescription):
     device_class: str = "",
     native_unit_of_measurement: str | None=None,
     state_class : str ="",
- 
+
 
 SENSOR_DESCRIPTIONS_MAP = {
-    f"CO2": MannitoFarmingSensorEntityDescription(
+    "CO2": MannitoFarmingSensorEntityDescription(
         key= "CO2",
-        translation_key="co2",        
+        translation_key="co2",
         device_class=SensorDeviceClass.CO2
     ),
-    f"TEMPERATURE": MannitoFarmingSensorEntityDescription(
+    "TEMPERATURE": MannitoFarmingSensorEntityDescription(
         key= "TEMPERATURE",
         translation_key="temperature",
         device_class=SensorDeviceClass.TEMPERATURE,
-        native_unit_of_measurement=UnitOfTemperature.CELSIUS,  
+        native_unit_of_measurement=UnitOfTemperature.CELSIUS,
         state_class=SensorStateClass.MEASUREMENT
     ),
-    f"HUMIDITY": MannitoFarmingSensorEntityDescription(
+    "HUMIDITY": MannitoFarmingSensorEntityDescription(
         key= "HUMIDITY",
         translation_key="humidity",
         device_class=SensorDeviceClass.HUMIDITY,
         native_unit_of_measurement=PERCENTAGE,
-        state_class=SensorStateClass.MEASUREMENT        
+        state_class=SensorStateClass.MEASUREMENT
     ),
-    f"PH": MannitoFarmingSensorEntityDescription(
+    "PH": MannitoFarmingSensorEntityDescription(
         key= "PH",
         translation_key="ph",
         device_class=SensorDeviceClass.PH,
         native_unit_of_measurement=None,
-        state_class=SensorStateClass.MEASUREMENT        
+        state_class=SensorStateClass.MEASUREMENT
     ),
-    f"EC": MannitoFarmingSensorEntityDescription(
+    "EC": MannitoFarmingSensorEntityDescription(
         key= "CONDUCTIVITY",
         translation_key="conductivity",
         device_class=SensorDeviceClass.CONDUCTIVITY,
         native_unit_of_measurement=None,
-        state_class=SensorStateClass.MEASUREMENT        
+        state_class=SensorStateClass.MEASUREMENT
     ),
-    f"WATERFLOW": MannitoFarmingSensorEntityDescription(
+    "WATERFLOW": MannitoFarmingSensorEntityDescription(
         key= "WATERFLOW",
         translation_key="waterflow",
         device_class=SensorDeviceClass.VOLUME_FLOW_RATE,
         native_unit_of_measurement=None,
-        state_class=SensorStateClass.MEASUREMENT        
+        state_class=SensorStateClass.MEASUREMENT
     ),
-    f"WATERLEVEL": MannitoFarmingSensorEntityDescription(
+    "WATERLEVEL": MannitoFarmingSensorEntityDescription(
         key= "WATERLEVEL",
         translation_key="waterlevel",
         device_class=SensorDeviceClass.VOLUME_STORAGE,
         native_unit_of_measurement=None,
-        state_class=SensorStateClass.MEASUREMENT        
+        state_class=SensorStateClass.MEASUREMENT
     )
 }
 
@@ -97,7 +91,7 @@ async def async_setup_entry(
     coordinator: MannitoFarmingDataUpdateCoordinator = hass.data[DOMAIN][entry.entry_id]
 
     entities = []
-    
+
     discovered_sensor = await coordinator.get_all_sensors()
     _LOGGER.debug("Discovered sensors: %s", discovered_sensor)
     for sensor in discovered_sensor:
@@ -113,7 +107,7 @@ async def async_setup_entry(
                     name=sensor.name,
                 )
             )
-       
+
     async_add_entities(entities)
 
 
@@ -148,7 +142,7 @@ class MannitoFarmingSensor(CoordinatorEntity[MannitoFarmingDataUpdateCoordinator
     @property
     def device_info(self) -> DeviceInfo:
         """Return the device info."""
-        api_device_info = self.coordinator.get_device_info()        
+        api_device_info = self.coordinator.get_device_info()
         return api_device_info
 
     @property

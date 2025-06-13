@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from homeassistant.components.fan import (
     FanEntity,
@@ -21,10 +21,9 @@ from homeassistant.util.percentage import (
     ranged_value_to_percentage,
 )
 
-from .api import DeviceType
 from .const import (
-    DOMAIN,
     DEVICE_TYPE_FAN,
+    DOMAIN,
 )
 from .coordinator import MannitoFarmingDataUpdateCoordinator
 
@@ -45,8 +44,8 @@ class MannitoFarmingFanEntityDescription(FanEntityDescription):
 
 # Fan descriptions for the 10 fans
 FAN_DESCRIPTIONS_MAP = {
-    f"FAN": MannitoFarmingFanEntityDescription(
-        key=f"FAN",
+    "FAN": MannitoFarmingFanEntityDescription(
+        key="FAN",
         translation_key="fan",
         device_type=DEVICE_TYPE_FAN,
         icon_on="mdi:fan",
@@ -114,8 +113,8 @@ class MannitoFarmingFan(CoordinatorEntity[MannitoFarmingDataUpdateCoordinator], 
         device = self.coordinator._devices.get(self._device_id)
         if device:
             return device.state
-        return False    
-    
+        return False
+
     @property
     def available(self) -> bool:
         """Return if entity is available."""
@@ -132,7 +131,7 @@ class MannitoFarmingFan(CoordinatorEntity[MannitoFarmingDataUpdateCoordinator], 
 
 
     @property
-    def percentage(self) -> Optional[int]:
+    def percentage(self) -> int | None:
         """Return the current speed percentage."""
         device = self.coordinator._devices.get(self._device_id)
         if device and device.speed is not None:
@@ -146,7 +145,7 @@ class MannitoFarmingFan(CoordinatorEntity[MannitoFarmingDataUpdateCoordinator], 
         return int_states_in_range(SPEED_RANGE)
 
     async def async_turn_on(
-        self, percentage: Optional[int] = None, preset_mode: Optional[str] = None, **kwargs: Any
+        self, percentage: int | None = None, preset_mode: str | None = None, **kwargs: Any
     ) -> None:
         """Turn the fan on."""
         if percentage is None:
@@ -155,35 +154,35 @@ class MannitoFarmingFan(CoordinatorEntity[MannitoFarmingDataUpdateCoordinator], 
         else:
             # Convert percentage to device speed
             speed = percentage_to_ranged_value(SPEED_RANGE, percentage)
-        
+
         # First turn on the fan
         await self.coordinator.async_set_device_state(self._device_id, True)
-        
+
         # Then set the speed if applicable
         if speed > 0:
             await self.coordinator.async_set_fan_speed(self._device_id, speed)
-        
+
         self.async_write_ha_state()
 
     async def async_turn_off(self, **kwargs: Any) -> None:
         """Turn the fan off."""
         await self.coordinator.async_set_device_state(self._device_id, False)
         self.async_write_ha_state()
-    
+
     async def async_set_percentage(self, percentage: int) -> None:
         """Set the speed percentage of the fan."""
         # Convert percentage to device speed
         speed = percentage_to_ranged_value(SPEED_RANGE, percentage)
-        
+
         # If setting to 0, turn off the fan
         if speed == 0:
             await self.async_turn_off()
             return
-        
+
         # If the fan is off, turn it on first
         if not self.is_on:
             await self.coordinator.async_set_device_state(self._device_id, True)
-        
+
         # Set the speed
         await self.coordinator.async_set_fan_speed(self._device_id, speed)
         self.async_write_ha_state()

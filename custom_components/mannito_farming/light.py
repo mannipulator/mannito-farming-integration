@@ -14,6 +14,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .coordinator import MannitoFarmingDataUpdateCoordinator
 
+
 async def async_setup_entry(
     hass: HomeAssistant,
     entry: ConfigEntry,
@@ -52,8 +53,8 @@ class GrowControllerLight(LightEntity):
         self._attr_name = name
         self._attr_unique_id = f"{entry.entry_id}_{device_id}"
         self._attr_is_on = False
-        self._attr_brightness = 0    
-        
+        self._attr_brightness = 0
+
     @property
     def available(self) -> bool:
         """Return if entity is available."""

@@ -1,7 +1,9 @@
 from unittest.mock import AsyncMock, patch
+
 import pytest
-from homeassistant.components.switch import SwitchEntity
+
 from custom_components.mannito_farming.switch import GrowControllerSwitch
+
 
 @pytest.fixture
 def mock_coordinator():

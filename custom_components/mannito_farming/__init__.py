@@ -23,10 +23,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     # Initialize the coordinator, which handles API communication and data updates
     coordinator = MannitoFarmingDataUpdateCoordinator(hass, entry)
-    
+
     # First refresh to get initial data
     await coordinator.async_config_entry_first_refresh()
-    
+
     # Store the coordinator in hass.data for the platforms to access
     hass.data.setdefault(DOMAIN, {})[entry.entry_id] = coordinator
 
@@ -42,14 +42,14 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""
     _LOGGER.debug("Unloading Mannito Farming integration for %s", entry.data[CONF_HOST])
-    
+
     # Unload platforms
     unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
-    
+
     # Remove the coordinator from hass.data
     if unload_ok:
         hass.data[DOMAIN].pop(entry.entry_id)
-        
+
         # Remove entire domain data if this was the last entry
         if not hass.data[DOMAIN]:
             hass.data.pop(DOMAIN)

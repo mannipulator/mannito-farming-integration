@@ -1,12 +1,12 @@
 """Test the Grow Controller coordinator."""
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
-from homeassistant.components.grow_controller.coordinator import GrowControllerDataUpdateCoordinator
-from homeassistant.const import CONF_HOST, CONF_PASSWORD, CONF_USERNAME, CONF_SENSORS
+from homeassistant.components.grow_controller.coordinator import (
+    GrowControllerDataUpdateCoordinator,
+)
+from homeassistant.const import CONF_HOST, CONF_PASSWORD, CONF_SENSORS, CONF_USERNAME
 from homeassistant.core import HomeAssistant
-
-from tests.common import MockConfigEntry
 
 VALID_CONFIG = {
     CONF_HOST: "192.168.1.100",
@@ -142,4 +142,4 @@ async def test_get_device_state_failure(coordinator):
     result = await coordinator.async_get_device_state("test_device")
 
     assert result == {}
-    coordinator.logger.error.assert_called() 
+    coordinator.logger.error.assert_called()
