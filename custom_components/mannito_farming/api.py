@@ -272,6 +272,24 @@ class API:
             _LOGGER.error("Error getting state for %s: %s", component_name, err)
             raise APIConnectionError(f"Error getting state for {component_name}: {err}")
 
+    async def get_all_device_states(self) -> dict[str, Any]:
+        """
+        Get the states of all devices using the bulk endpoint.
+        
+        Returns:
+            Dictionary with all device states from /api/device/all
+
+        """
+        url = f"http://{self.host}/api/device/all"
+        try:
+            async with self.session.get(url, auth=self.auth) as response:
+                if response.status == 200:
+                    return await response.json()
+                return {}
+        except Exception as err:
+            _LOGGER.error("Error getting all device states: %s", err)
+            raise APIConnectionError(f"Error getting all device states: {err}")
+
     async def get_device_state(self, component_name: str) -> dict[str, Any]:
         """
         Get the state of a device.

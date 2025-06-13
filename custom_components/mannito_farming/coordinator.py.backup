@@ -78,54 +78,30 @@ class MannitoFarmingDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]])
                 sensors = await self.api.discover_sensors()
                 for sensor in sensors:
                     self._sensors[sensor.sensor_id] = sensor            # Update all device states
-
-            # Update all device states using bulk endpoint
             data = {}
-            try:
-                # Fetch all device states in one call
-                bulk_response = await self.api.get_all_device_states()
-                devices_data = bulk_response.get("devices", []) if bulk_response else []
+            for device_id, device in self._devices.items():
+                try:
+                    state_data = await self.api.get_device_state(device_id)
+                    data[device_id] = state_data
 
-                # First mark all devices as unavailable
-                for device in self._devices.values():
-                    device.available = False
-
-                # Process bulk response and update device states
-                for device_info in devices_data:
-                    device_id = device_info.get("deviceId")
-                    if device_id and device_id in self._devices:
-                        device = self._devices[device_id]
-
-                        # Device responded, so it's available
+                    # If we got a response with data, the device is available
+                    if state_data:
                         device.available = True
-
-                        # Update device state - checking both 'state' and level-based devices
-                        if "state" in device_info:
-                            device.state = device_info["state"]
-
-                        # Handle level (speed) for devices that support it (like fans)
-                        if "level" in device_info and device.speed is not None:
-                            device.speed = device_info["level"]
-
-                        # Store state data in the data dict for entities to use
-                        data[device_id] = {
-                            "state": device_info.get("state", False),
-                            "speed": device_info.get("level"),
-                            "unit": device_info.get("unit")
-                        }
-
-                # Log any devices that weren't in the bulk response
-                for device_id, device in self._devices.items():
-                    if not device.available:
+                        # Update stored device state
+                        if "state" in state_data:
+                            device.state = state_data["state"]
+                        if "speed" in state_data and device.speed is not None:
+                            device.speed = state_data["speed"]
+                    else:
+                        # Empty response means the device is not available
+                        device.available = False
                         _LOGGER.warning("Device %s is not responding, marking as unavailable", device_id)
-                        data[device_id] = {}  # Empty data for unavailable device
-
-            except Exception as err:
-                # If bulk endpoint fails, mark all devices unavailable
-                for device in self._devices.values():
+                except Exception as err:
+                    # If an error occurred, the device is not available
                     device.available = False
-                _LOGGER.error("Error updating device states via bulk endpoint: %s", err)
-                raise UpdateFailed(f"Error updating device data: {err}")
+                    _LOGGER.error("Error updating device %s: %s", device_id, err)
+                    raise UpdateFailed(f"Error updating data: {err}")
+
             for sensor_id, sensor in self._sensors.items():
                 try:
                     sensor_data = await self.api.get_sensor_state(sensor_id)
