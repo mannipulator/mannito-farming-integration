@@ -92,7 +92,7 @@ class MannitoFarmingDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]])
 
                 # Process bulk response and update device states
                 for device_info in devices_data:
-                    device_id = device_info.get("deviceId")
+                    device_id = device_info.get("device_id")
                     if device_id and device_id in self._devices:
                         device = self._devices[device_id]
 
@@ -103,15 +103,15 @@ class MannitoFarmingDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]])
                         if "state" in device_info:
                             device.state = device_info["state"]
 
-                        # Handle level (speed) for devices that support it (like fans)
-                        if "level" in device_info and device.speed is not None:
-                            device.speed = device_info["level"]
+                        # Handle powerlevel (speed) for devices that support it (like fans)
+                        if "powerlevel" in device_info and device.speed is not None:
+                            device.speed = device_info["powerlevel"]
 
                         # Store state data in the data dict for entities to use
                         data[device_id] = {
                             "state": device_info.get("state", False),
-                            "speed": device_info.get("level"),
-                            "unit": device_info.get("unit")
+                            "speed": device_info.get("powerlevel"),
+                            "unit": device_info.get("powerlevel_unit")
                         }
 
                 # Log any devices that weren't in the bulk response

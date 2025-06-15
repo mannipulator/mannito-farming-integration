@@ -277,10 +277,10 @@ class API:
         Get the states of all devices using the bulk endpoint.
         
         Returns:
-            Dictionary with all device states from /api/device/all
+            Dictionary with all device states from /api/devices/all
 
         """
-        url = f"http://{self.host}/api/device/all"
+        url = f"http://{self.host}/api/devices/all"
         try:
             async with self.session.get(url, auth=self.auth) as response:
                 if response.status == 200:
