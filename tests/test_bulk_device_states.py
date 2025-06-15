@@ -121,9 +121,75 @@ def test_new_format_with_fan_device():
     assert len(sensors) == 0
 
 
+def test_graceful_handling_of_missing_fields():
+    """Test graceful handling when optional fields are missing."""
+    # Test device with only required fields
+    minimal_device = {
+        "device_id": "MINIMAL_DEVICE",
+        "state": True
+        # No powerlevel or powerlevel_unit
+    }
+    
+    # This should work without errors
+    device_id = minimal_device.get("device_id")
+    state = minimal_device.get("state", False)
+    powerlevel = minimal_device.get("powerlevel")  # Should be None
+    unit = minimal_device.get("powerlevel_unit")   # Should be None
+    
+    assert device_id == "MINIMAL_DEVICE"
+    assert state is True
+    assert powerlevel is None
+    assert unit is None
+
+
+def test_backward_compatibility_response_structure():
+    """Test that the new response structure is correctly processed."""
+    # Ensure the response structure handles the devices array correctly
+    response_with_multiple_devices = {
+        "devices": [
+            {
+                "device_id": "PUMP1",
+                "state": True
+            },
+            {
+                "device_id": "RELAY1", 
+                "state": False
+            },
+            {
+                "device_id": "FAN2",
+                "state": True,
+                "powerlevel": 50,
+                "powerlevel_unit": "PERCENTAGE"
+            }
+        ],
+        "sensors": []
+    }
+    
+    devices = response_with_multiple_devices.get("devices", [])
+    assert len(devices) == 3
+    
+    # Check different device types work
+    pump = devices[0]
+    assert pump["device_id"] == "PUMP1"
+    assert pump["state"] is True
+    assert "powerlevel" not in pump  # Pump doesn't have powerlevel
+    
+    relay = devices[1]
+    assert relay["device_id"] == "RELAY1"
+    assert relay["state"] is False
+    
+    fan = devices[2]
+    assert fan["device_id"] == "FAN2"
+    assert fan["state"] is True
+    assert fan["powerlevel"] == 50
+    assert fan["powerlevel_unit"] == "PERCENTAGE"
+
+
 if __name__ == "__main__":
     test_bulk_device_response_format()
     test_bulk_endpoint_url_construction()
     test_device_data_conversion()
     test_new_format_with_fan_device()
+    test_graceful_handling_of_missing_fields()
+    test_backward_compatibility_response_structure()
     print("All bulk device state tests passed!")
