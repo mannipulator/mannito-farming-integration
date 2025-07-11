@@ -146,11 +146,11 @@ class MannitoFarmingFan(CoordinatorEntity[MannitoFarmingDataUpdateCoordinator], 
 
     @property
     def percentage(self) -> int | None:
-        """Return the current speed percentage."""
+        """Return the current powerlevel percentage."""
         device = self.coordinator._devices.get(self._device_id)
-        if device and device.speed is not None:
-            # Convert the device speed to percentage
-            return ranged_value_to_percentage(SPEED_RANGE, device.speed)
+        if device and device.powerlevel is not None:
+            # Convert the device powerlevel to percentage
+            return ranged_value_to_percentage(SPEED_RANGE, device.powerlevel)
         return None
 
     @property

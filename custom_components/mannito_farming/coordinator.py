@@ -92,7 +92,7 @@ class MannitoFarmingDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]])
 
                 # Process bulk response and update device states
                 for device_info in devices_data:
-                    device_id = device_info.get("device_id")
+                    device_id = device_info.get("id")
                     if device_id and device_id in self._devices:
                         device = self._devices[device_id]
 
@@ -104,13 +104,13 @@ class MannitoFarmingDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]])
                             device.state = device_info["state"]
 
                         # Handle powerlevel (speed) for devices that support it (like fans)
-                        if "powerlevel" in device_info and device.speed is not None:
-                            device.speed = device_info["powerlevel"]
+                        if "powerlevel" in device_info:
+                            device.powerlevel = device_info["powerlevel"]
 
                         # Store state data in the data dict for entities to use
                         data[device_id] = {
                             "state": device_info.get("state", False),
-                            "speed": device_info.get("powerlevel"),
+                            "powerlevel": device_info.get("powerlevel"),
                             "unit": device_info.get("powerlevel_unit")
                         }
 
@@ -137,9 +137,9 @@ class MannitoFarmingDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]])
                     if sensor_data:
                         sensor.available = True
                         # Update stored sensor value
-                        if "value" in sensor_data:
+                        if "sensor_value" in sensor_data:
                             if sensor_data.get("is_valid"):
-                                sensor.sensor_value = sensor_data["value"]
+                                sensor.sensor_value = sensor_data["sensor_value"]
                     else:
                         # Empty response means the sensor is not available
                         sensor.available = False
@@ -234,8 +234,8 @@ class MannitoFarmingDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]])
         success = await self.api.set_fan_speed(device_id, speed)
         if success and device_id in self._devices:
             device = self._devices[device_id]
-            if device.speed is not None:  # Only update if it's a fan
-                device.speed = speed
+            if device.powerlevel is not None:  # Only update if it's a fan
+                device.powerlevel = speed
         return success
 
     def get_device_info(self) -> DeviceInfo:

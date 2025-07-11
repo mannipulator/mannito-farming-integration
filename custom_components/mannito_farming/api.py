@@ -139,7 +139,7 @@ class Device:
     device_type: DeviceType
     name: str
     state: bool = False
-    speed: int | None = None
+    powerlevel: int | None = None
     available: bool = True
 
 @dataclass
