@@ -18,13 +18,13 @@ class DeviceType(StrEnum):
     def parse(cls, value: str) -> "DeviceType":
         """
         Parse a string into a DeviceType enum.
-        
+
         Args:
             value: The string to parse
-            
+
         Returns:
             The corresponding DeviceType enum value
-            
+
         Raises:
             ValueError: If the string doesn't match any DeviceType
 
@@ -63,13 +63,13 @@ class SensorType(StrEnum):
     def parse(cls, value: str) -> "SensorType":
         """
         Parse a string into a DeviceType enum.
-        
+
         Args:
             value: The string to parse
-            
+
         Returns:
             The corresponding DeviceType enum value
-            
+
         Raises:
             ValueError: If the string doesn't match any DeviceType
 

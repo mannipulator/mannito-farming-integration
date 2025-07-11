@@ -197,42 +197,6 @@ async def async_setup_entry(
             )
     async_add_entities(entities)
 
-    # # Add valves
-    # for description in VALVE_ENTITY_DESCRIPTIONS:
-    #     device = await coordinator.get_device(description.key)
-    #     if device:
-    #         entities.append(
-    #             MannitoFarmingSwitch(
-    #                 coordinator=coordinator,
-    #                 entry_id=entry.entry_id,
-    #                 description=description,
-    #             )
-    #         )
-
-    # # Add relays
-    # for description in RELAY_ENTITY_DESCRIPTIONS:
-    #     device = await coordinator.get_device(description.key)
-    #     if device:
-    #         entities.append(
-    #             MannitoFarmingSwitch(
-    #                 coordinator=coordinator,
-    #                 entry_id=entry.entry_id,
-    #                 description=description,
-    #             )
-    #         )
-
-    # # Add pumps
-    # for description in PUMP_ENTITY_DESCRIPTIONS:
-    #     device = await coordinator.get_device(description.key)
-    #     if device:
-    #         entities.append(
-    #             MannitoFarmingSwitch(
-    #                 coordinator=coordinator,
-    #                 entry_id=entry.entry_id,
-    #                 description=description,
-    #             )
-    #         )
-
 
 
 class MannitoFarmingSwitch(CoordinatorEntity[MannitoFarmingDataUpdateCoordinator], SwitchEntity):
@@ -273,8 +237,6 @@ class MannitoFarmingSwitch(CoordinatorEntity[MannitoFarmingDataUpdateCoordinator
     @property
     def device_info(self) -> DeviceInfo:
         """Return the device info."""
-        # Safely access device_info, providing defaults if not available
-        # api_device_info = getattr(self.coordinator.api, "device_info", None) or {}
         api_device_info = self.coordinator.get_device_info()
 
         _LOGGER.debug("Device info: %s", api_device_info)
