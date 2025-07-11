@@ -209,7 +209,7 @@ class MannitoFarmingSwitch(
         """Return if entity is available."""
         device = self.coordinator._devices.get(self._device_id)
         coordinator_ok = self.coordinator.last_update_success
-        device_ok = device is not None and getattr(device, "available", True)
+        device_ok = device is not None
 
         _LOGGER.debug(
             "Device %s availability check: coordinator=%s, device_exists=%s, "
