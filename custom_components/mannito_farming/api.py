@@ -33,10 +33,27 @@ class DeviceType(StrEnum):
             return cls(value.upper())
         except ValueError:
             raise ValueError(f"'{value}' is not a valid DeviceType")
-    FAN = "FAN"
+
+    # Fan types
+    EC_FAN = "EC_FAN"
+    DC_FAN = "DC_FAN"
+    AC_FAN = "AC_FAN"
+
+    # Switch device types
     RELAY = "RELAY"
-    SOLENOID = "SOLENOID"
+    HUMIDIFIER = "HUMIDIFIER"
+    DEHUMIDIFIER = "DEHUMIDIFIER"
     PUMP = "PUMP"
+    SOLENOID = "SOLENOID"
+    AIR_PUMP = "AIR_PUMP"
+    HEATER = "HEATER"
+    COOLER = "COOLER"
+    CO2_VALVE = "CO2_VALVE"
+    HEAT_MAT = "HEAT_MAT"
+    PERISTALTIC_PUMP = "PERISTALTIC_PUMP"
+    MISTING_SYSTEM = "MISTING_SYSTEM"
+    GENERIC_SOCKET = "GENERIC_SOCKET"
+
     OTHER = "OTHER"
 
 class SensorType(StrEnum):
