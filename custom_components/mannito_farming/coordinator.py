@@ -139,7 +139,7 @@ class MannitoFarmingDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]])
                         # Update stored sensor value
                         if "value" in sensor_data:
                             if sensor_data.get("is_valid"):
-                                sensor.state_value = sensor_data["value"]
+                                sensor.sensor_value = sensor_data["value"]
                     else:
                         # Empty response means the sensor is not available
                         sensor.available = False

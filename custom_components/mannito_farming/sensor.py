@@ -154,9 +154,9 @@ class MannitoFarmingSensor(
         sensor = self.coordinator._sensors.get(self._device_id)
         if sensor:
             _LOGGER.debug(
-                "Fetching sensor value for %s: %s", self._device_id, sensor.state_value
+                "Fetching sensor value for %s: %s", self._device_id, sensor.sensor_value
             )
-            value = sensor.state_value
+            value = sensor.sensor_value
 
             # If sensor has state_class="measurement", ensure value is numeric
             if (

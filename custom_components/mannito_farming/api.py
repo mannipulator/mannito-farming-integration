@@ -150,7 +150,7 @@ class Sensor:
     sensor_unique_id: str
     sensor_type: SensorType
     name: str
-    state_value: str = ""
+    sensor_value: str = ""
     available: bool = True
 
 class APIAuthError(Exception):
@@ -365,7 +365,7 @@ class API:
             deviceList = config.get("devices", [])
 
             for device in deviceList:
-                deviceid = device.get("device_id")
+                deviceid = device.get("id")
                 device_type_str = device.get("device_type", "OTHER")
                 try:
                     device_type = DeviceType.parse(device_type_str)
@@ -377,7 +377,7 @@ class API:
                     device_id=deviceid,
                     device_unique_id=f"{self.host}_{deviceid}",
                     device_type=device_type,
-                    name=device.get("device_name"),
+                    name=device.get("name"),
                 ))
 
             return devices
@@ -400,7 +400,7 @@ class API:
             sensorList = config.get("sensors", [])
 
             for sensor in sensorList:
-                sensorid = sensor.get("sensor_id")
+                sensorid = sensor.get("id")
                 sensor_type_str = sensor.get("sensor_type", "OTHER")
                 try:
                     sensor_type = SensorType.parse(sensor_type_str)
@@ -412,7 +412,7 @@ class API:
                     sensor_id=sensorid,
                     sensor_unique_id=f"{self.host}_{sensorid}",
                     sensor_type=sensor_type,
-                    name=sensor.get("sensor_name"),
+                    name=sensor.get("name"),
                 ))
 
             return sensors
