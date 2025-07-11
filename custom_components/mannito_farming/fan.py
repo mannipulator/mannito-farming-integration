@@ -42,11 +42,25 @@ class MannitoFarmingFanEntityDescription(FanEntityDescription):
     icon_off: str | None = None
 
 
-# Fan descriptions for the 10 fans
+# Fan descriptions for the different fan types
 FAN_DESCRIPTIONS_MAP = {
-    "FAN": MannitoFarmingFanEntityDescription(
-        key="FAN",
-        translation_key="fan",
+    "EC_FAN": MannitoFarmingFanEntityDescription(
+        key="EC_FAN",
+        translation_key="ec_fan",
+        device_type=DEVICE_TYPE_FAN,
+        icon_on="mdi:fan",
+        icon_off="mdi:fan-off",
+    ),
+    "DC_FAN": MannitoFarmingFanEntityDescription(
+        key="DC_FAN",
+        translation_key="dc_fan",
+        device_type=DEVICE_TYPE_FAN,
+        icon_on="mdi:fan",
+        icon_off="mdi:fan-off",
+    ),
+    "AC_FAN": MannitoFarmingFanEntityDescription(
+        key="AC_FAN",
+        translation_key="ac_fan",
         device_type=DEVICE_TYPE_FAN,
         icon_on="mdi:fan",
         icon_off="mdi:fan-off",
