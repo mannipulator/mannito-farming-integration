@@ -13,13 +13,19 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import (
+    DEVICE_TYPE_AIR_PUMP,
+    DEVICE_TYPE_CO2_VALVE,
+    DEVICE_TYPE_COOLER,
+    DEVICE_TYPE_DEHUMIDIFIER,
+    DEVICE_TYPE_HEAT_MAT,
+    DEVICE_TYPE_HEATER,
+    DEVICE_TYPE_HUMIDIFIER,
+    DEVICE_TYPE_MISTING_SYSTEM,
+    DEVICE_TYPE_PERISTALTIC_PUMP,
     DEVICE_TYPE_PUMP,
     DEVICE_TYPE_RELAY,
     DEVICE_TYPE_VALVE,
     DOMAIN,
-    PUMP_COUNT,
-    RELAY_COUNT,
-    VALVE_COUNT,
 )
 from .coordinator import MannitoFarmingDataUpdateCoordinator
 
@@ -61,63 +67,63 @@ SWITCH_DESCRIPTIONS_MAP = {
     "HUMIDIFIER": MannitoFarmingSwitchEntityDescription(
         translation_key="humidifier",
         key="HUMIDIFIER",
-        device_type="humidifier",
+        device_type=DEVICE_TYPE_HUMIDIFIER,
         icon_on="mdi:air-humidifier",
         icon_off="mdi:air-humidifier-off",
     ),
     "DEHUMIDIFIER": MannitoFarmingSwitchEntityDescription(
         translation_key="dehumidifier",
         key="DEHUMIDIFIER",
-        device_type="dehumidifier",
+        device_type=DEVICE_TYPE_DEHUMIDIFIER,
         icon_on="mdi:water-minus",
         icon_off="mdi:water-minus-outline",
     ),
     "AIR_PUMP": MannitoFarmingSwitchEntityDescription(
         translation_key="air_pump",
         key="AIR_PUMP",
-        device_type="air_pump",
+        device_type=DEVICE_TYPE_AIR_PUMP,
         icon_on="mdi:pump",
         icon_off="mdi:pump-off",
     ),
     "HEATER": MannitoFarmingSwitchEntityDescription(
         translation_key="heater",
         key="HEATER",
-        device_type="heater",
+        device_type=DEVICE_TYPE_HEATER,
         icon_on="mdi:radiator",
         icon_off="mdi:radiator-off",
     ),
     "COOLER": MannitoFarmingSwitchEntityDescription(
         translation_key="cooler",
         key="COOLER",
-        device_type="cooler",
+        device_type=DEVICE_TYPE_COOLER,
         icon_on="mdi:snowflake",
         icon_off="mdi:snowflake-off",
     ),
     "CO2_VALVE": MannitoFarmingSwitchEntityDescription(
         translation_key="co2_valve",
         key="CO2_VALVE",
-        device_type="co2_valve",
+        device_type=DEVICE_TYPE_CO2_VALVE,
         icon_on="mdi:valve-open",
         icon_off="mdi:valve-closed",
     ),
     "HEAT_MAT": MannitoFarmingSwitchEntityDescription(
         translation_key="heat_mat",
         key="HEAT_MAT",
-        device_type="heat_mat",
+        device_type=DEVICE_TYPE_HEAT_MAT,
         icon_on="mdi:heating-coil",
         icon_off="mdi:heating-coil",
     ),
     "PERISTALTIC_PUMP": MannitoFarmingSwitchEntityDescription(
         translation_key="peristaltic_pump",
         key="PERISTALTIC_PUMP",
-        device_type="peristaltic_pump",
+        device_type=DEVICE_TYPE_PERISTALTIC_PUMP,
         icon_on="mdi:pump",
         icon_off="mdi:pump-off",
     ),
     "MISTING_SYSTEM": MannitoFarmingSwitchEntityDescription(
         translation_key="misting_system",
         key="MISTING_SYSTEM",
-        device_type="misting_system",
+        device_type=DEVICE_TYPE_MISTING_SYSTEM,
         icon_on="mdi:sprinkler",
         icon_off="mdi:sprinkler-off",
     ),
@@ -129,47 +135,6 @@ SWITCH_DESCRIPTIONS_MAP = {
         icon_off="mdi:power-plug-off",
     ),
 }
-
-
-# Switch descriptions for valves
-VALVE_ENTITY_DESCRIPTIONS = [
-    MannitoFarmingSwitchEntityDescription(
-        key=f"SOLENOID{i}",
-        translation_key="valve",
-        name=f"Valve {i}",
-        device_type=DEVICE_TYPE_VALVE,
-        icon_on="mdi:water",
-        icon_off="mdi:water-off",
-    )
-    for i in range(1, VALVE_COUNT + 1)
-]
-
-# Switch descriptions for relays
-RELAY_ENTITY_DESCRIPTIONS = [
-    MannitoFarmingSwitchEntityDescription(
-        key=f"RELAY{i}",
-        translation_key="relay",
-        name=f"Relay {i}",
-        device_type=DEVICE_TYPE_RELAY,
-        icon_on="mdi:power-plug",
-        icon_off="mdi:power-plug-off",
-    )
-    for i in range(1, RELAY_COUNT + 1)
-]
-
-# Switch descriptions for pumps
-PUMP_ENTITY_DESCRIPTIONS = [
-    MannitoFarmingSwitchEntityDescription(
-        key=f"PUMP{i}",
-        translation_key="pump",
-        name=f"Pump {i}",
-        device_type=DEVICE_TYPE_PUMP,
-        icon_on="mdi:pump",
-        icon_off="mdi:pump-off",
-    )
-    for i in range(1, PUMP_COUNT + 1)
-]
-
 
 async def async_setup_entry(
     hass: HomeAssistant,
@@ -184,7 +149,9 @@ async def async_setup_entry(
     discovered_devices = await coordinator.get_all_devices()
     _LOGGER.debug("Discovered switch-devices: %s", discovered_devices)
     for device in discovered_devices:
-        descriptor: MannitoFarmingSwitchEntityDescription = SWITCH_DESCRIPTIONS_MAP.get(device.device_type)
+        descriptor: MannitoFarmingSwitchEntityDescription = (
+            SWITCH_DESCRIPTIONS_MAP.get(device.device_type)
+        )
         if descriptor:
             entities.append(
                 MannitoFarmingSwitch(
@@ -199,7 +166,9 @@ async def async_setup_entry(
 
 
 
-class MannitoFarmingSwitch(CoordinatorEntity[MannitoFarmingDataUpdateCoordinator], SwitchEntity):
+class MannitoFarmingSwitch(
+    CoordinatorEntity[MannitoFarmingDataUpdateCoordinator], SwitchEntity
+):
     """Representation of a Mannito Farming switch."""
 
     entity_description: MannitoFarmingSwitchEntityDescription
@@ -219,11 +188,19 @@ class MannitoFarmingSwitch(CoordinatorEntity[MannitoFarmingDataUpdateCoordinator
         self._device_id = device_id
         self._attr_unique_id = f"{entry.entry_id}_{self._device_id}"
         self._attr_name = name
+        self._cached_state = False
+
+    def _get_device_attribute(self, attribute: str, default: Any = None) -> Any:
+        """Safely get device attribute with fallback."""
+        device = self.coordinator._devices.get(self._device_id)
+        if device is not None:
+            return getattr(device, attribute, default)
+        return default
 
     @property
     def icon(self) -> str | None:
         """Return the icon to use in the frontend."""
-        if self.is_on:
+        if self._cached_state:
             return self.entity_description.icon_on
         return self.entity_description.icon_off
 
@@ -231,8 +208,16 @@ class MannitoFarmingSwitch(CoordinatorEntity[MannitoFarmingDataUpdateCoordinator
     def available(self) -> bool:
         """Return if entity is available."""
         device = self.coordinator._devices.get(self._device_id)
-        # Check both coordinator update success and device-specific availability
-        return self.coordinator.last_update_success and (device and device.available)
+        coordinator_ok = self.coordinator.last_update_success
+        device_ok = device is not None and getattr(device, "available", True)
+
+        _LOGGER.debug(
+            "Device %s availability check: coordinator=%s, device_exists=%s, "
+            "device_available=%s",
+            self._device_id, coordinator_ok, device is not None, device_ok
+        )
+
+        return coordinator_ok and device_ok
 
     @property
     def device_info(self) -> DeviceInfo:
@@ -246,19 +231,27 @@ class MannitoFarmingSwitch(CoordinatorEntity[MannitoFarmingDataUpdateCoordinator
     def is_on(self) -> bool:
         """Return true if the switch is on."""
         device = self.coordinator._devices.get(self._device_id)
-        if device:
-            return device.state
-        return False
+        if device is not None:
+            self._cached_state = getattr(device, "state", False)
+        return self._cached_state
 
-    async def async_turn_on(self, **kwargs: Any) -> None:
+    async def async_turn_on(self, **_kwargs: Any) -> None:
         """Turn the switch on."""
-        await self.coordinator.async_set_device_state(self._device_id, True)
-        self.async_write_ha_state()
+        try:
+            await self.coordinator.async_set_device_state(self._device_id, True)
+            self.async_write_ha_state()
+        except Exception:
+            _LOGGER.exception("Failed to turn on device %s", self._device_id)
+            raise
 
-    async def async_turn_off(self, **kwargs: Any) -> None:
+    async def async_turn_off(self, **_kwargs: Any) -> None:
         """Turn the switch off."""
-        await self.coordinator.async_set_device_state(self._device_id, False)
-        self.async_write_ha_state()
+        try:
+            await self.coordinator.async_set_device_state(self._device_id, False)
+            self.async_write_ha_state()
+        except Exception:
+            _LOGGER.exception("Failed to turn off device %s", self._device_id)
+            raise
 
     @callback
     def _handle_coordinator_update(self) -> None:
