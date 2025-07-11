@@ -95,7 +95,9 @@ async def async_setup_entry(
     discovered_sensor = await coordinator.get_all_sensors()
     _LOGGER.debug("Discovered sensors: %s", discovered_sensor)
     for sensor in discovered_sensor:
-        descriptor: MannitoFarmingSensorEntityDescription = SENSOR_DESCRIPTIONS_MAP.get(sensor.sensor_type)
+        descriptor: MannitoFarmingSensorEntityDescription = (
+            SENSOR_DESCRIPTIONS_MAP.get(sensor.sensor_type)
+        )
 
         if descriptor:
             entities.append(
@@ -111,7 +113,9 @@ async def async_setup_entry(
     async_add_entities(entities)
 
 
-class MannitoFarmingSensor(CoordinatorEntity[MannitoFarmingDataUpdateCoordinator],SensorEntity):
+class MannitoFarmingSensor(
+    CoordinatorEntity[MannitoFarmingDataUpdateCoordinator], SensorEntity
+):
     """Representation of a Grow Controller temperature sensor."""
 
     entity_description: MannitoFarmingSensorEntityDescription
@@ -142,15 +146,40 @@ class MannitoFarmingSensor(CoordinatorEntity[MannitoFarmingDataUpdateCoordinator
     @property
     def device_info(self) -> DeviceInfo:
         """Return the device info."""
-        api_device_info = self.coordinator.get_device_info()
-        return api_device_info
+        return self.coordinator.get_device_info()
 
     @property
-    def native_value(self):
+    def native_value(self) -> str | None:
         """Return the sensor's current value."""
         sensor = self.coordinator._sensors.get(self._device_id)
         if sensor:
-            _LOGGER.debug("Fetching sensor value for %s: %s", self._device_id, sensor.state_value)
-            return sensor.state_value
+            _LOGGER.debug(
+                "Fetching sensor value for %s: %s", self._device_id, sensor.state_value
+            )
+            value = sensor.state_value
+
+            # If sensor has state_class="measurement", ensure value is numeric
+            if (
+                hasattr(self.entity_description, "state_class")
+                and self.entity_description.state_class == SensorStateClass.MEASUREMENT
+            ):
+                # For measurement sensors, validate that the value is numeric
+                if value is None or value == "":
+                    return None
+                try:
+                    # Try to convert to float to validate it's numeric
+                    float(value)
+                    return value
+                except (ValueError, TypeError):
+                    _LOGGER.warning(
+                        "Sensor %s has state_class 'measurement' but returned "
+                        "non-numeric value: %s (%s). Returning None.",
+                        self._device_id,
+                        value,
+                        type(value).__name__,
+                    )
+                    return None
+
+            return value
         return None
 
