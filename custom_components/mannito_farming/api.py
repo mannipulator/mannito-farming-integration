@@ -9,6 +9,33 @@ from aiohttp import BasicAuth, ClientSession
 _LOGGER = logging.getLogger(__name__)
 
 
+class SlotSensorType(StrEnum):
+    """Slot parameter sensor types."""
+
+    @classmethod
+    def parse(cls, value: str) -> "SlotSensorType":
+        """
+        Parse a string into a SlotSensorType enum.
+
+        Args:
+            value: The string to parse
+
+        Returns:
+            The corresponding SlotSensorType enum value
+
+        Raises:
+            ValueError: If the string doesn't match any SlotSensorType
+
+        """
+        try:
+            return cls(value.upper())
+        except ValueError:
+            raise ValueError(f"'{value}' is not a valid SlotSensorType")
+
+    AIR_TEMPERATURE = "AIR_TEMPERATURE"
+    AIR_HUMIDITY = "AIR_HUMIDITY" 
+    LEAF_TEMPERATURE = "LEAF_TEMPERATURE"
+    OTHER = "OTHER"
 
 
 class DeviceType(StrEnum):
@@ -84,7 +111,7 @@ class SensorType(StrEnum):
     CO2 = "CO2"
     WATERLEVEL = "WATERLEVEL"
     WATERFLOW = "WATERFLOW"
-    LEAF_TEMPERATURE="LEAF_TEMPERATURE"
+    LEAF_TEMPERATURE = "LEAF_TEMPERATURE"
     PH = "PH"
     EC = "EC"
     OTHER = "OTHER"
@@ -151,6 +178,18 @@ class Sensor:
     sensor_type: SensorType
     name: str
     sensor_value: str = ""
+    available: bool = True
+
+@dataclass
+class SlotParameter:
+    """Slot parameter information."""
+
+    slot_name: str
+    parameter: SlotSensorType
+    parameter_id: str  # Unique ID like "slot_default_air_temperature"
+    parameter_unique_id: str
+    name: str  # Display name like "Default Slot - Air Temperature"
+    value: float | int = 0
     available: bool = True
 
 class APIAuthError(Exception):
@@ -420,6 +459,52 @@ class API:
             _LOGGER.error("Error discovering devices: %s", err)
             return []
 
+    async def discover_slot_parameters(self) -> list[SlotParameter]:
+        """
+        Discover available slot parameters from the /devices/all endpoint.
+        
+        Returns:
+            List of discovered slot parameters
+
+        """
+        slot_parameters = []
+        try:
+            # Use the bulk endpoint to get slot data
+            bulk_data = await self.get_all_device_states()
+            slots_data = bulk_data.get("slots", [])
+
+            for slot in slots_data:
+                slot_name = slot.get("name", "Unknown Slot")
+                parameters = slot.get("parameters", [])
+                
+                for param in parameters:
+                    parameter_name = param.get("parameter", "OTHER")
+                    parameter_value = param.get("value", 0)
+                    
+                    try:
+                        slot_sensor_type = SlotSensorType.parse(parameter_name)
+                    except ValueError:
+                        _LOGGER.warning("Unknown slot parameter type: %s, using OTHER", parameter_name)
+                        slot_sensor_type = SlotSensorType.OTHER
+                    
+                    # Create unique IDs
+                    slot_clean = slot_name.lower().replace(" ", "_")
+                    param_clean = parameter_name.lower()
+                    parameter_id = f"slot_{slot_clean}_{param_clean}"
+                    
+                    slot_parameters.append(SlotParameter(
+                        slot_name=slot_name,
+                        parameter=slot_sensor_type,
+                        parameter_id=parameter_id,
+                        parameter_unique_id=f"{self.host}_{parameter_id}",
+                        name=f"{slot_name} - {parameter_name.replace('_', ' ').title()}",
+                        value=parameter_value,
+                    ))
+
+            return slot_parameters
+        except Exception as err:
+            _LOGGER.error("Error discovering slot parameters: %s", err)
+            return []
 
 
     async def get_device_info(self) -> dict[str, Any]:

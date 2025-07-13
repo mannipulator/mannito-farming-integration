@@ -10,7 +10,7 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
-from .api import API, Device, Sensor
+from .api import API, Device, Sensor, SlotParameter
 from .const import DEFAULT_UPDATE_INTERVAL, DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
@@ -37,6 +37,7 @@ class MannitoFarmingDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]])
         self.api = API(self.host, self.username, self.password, self.session)
         self._devices: dict[str, Device] = {}
         self._sensors: dict[str, Sensor] = {}
+        self._slot_parameters: dict[str, SlotParameter] = {}
         self.device_info: dict[str, Any] = {}
 
         _LOGGER.debug("Initializing coordinator for host: %s", self.host)
@@ -79,6 +80,12 @@ class MannitoFarmingDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]])
                 for sensor in sensors:
                     self._sensors[sensor.sensor_id] = sensor            # Update all device states
 
+            if not self._slot_parameters:
+                # First run, discover all slot parameters
+                slot_parameters = await self.api.discover_slot_parameters()
+                for slot_param in slot_parameters:
+                    self._slot_parameters[slot_param.parameter_id] = slot_param
+
             # Update all device states using bulk endpoint
             data = {}
             try:
@@ -86,6 +93,7 @@ class MannitoFarmingDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]])
                 bulk_response = await self.api.get_all_device_states()
                 devices_data = bulk_response.get("devices", []) if bulk_response else []
 
+                _LOGGER.debug("Bulk device data received: %s", devices_data)
                 # First mark all devices as unavailable
                 for device in self._devices.values():
                     device.available = False
@@ -126,6 +134,53 @@ class MannitoFarmingDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]])
                     device.available = False
                 _LOGGER.error("Error updating device states via bulk endpoint: %s", err)
                 raise UpdateFailed(f"Error updating device data: {err}")
+            
+            # Update slot parameters from the same bulk response
+            try:
+                slots_data = bulk_response.get("slots", []) if bulk_response else []
+                _LOGGER.debug("Slots data received: %s", slots_data)
+                
+                # First mark all slot parameters as unavailable
+                for slot_param in self._slot_parameters.values():
+                    slot_param.available = False
+                
+                # Process slots data and update parameter values
+                for slot in slots_data:
+                    slot_name = slot.get("name", "Unknown Slot")
+                    parameters = slot.get("parameters", [])
+                    
+                    for param in parameters:
+                        parameter_name = param.get("parameter", "OTHER")
+                        parameter_value = param.get("value", 0)
+                        
+                        # Create the same ID format as in discovery
+                        slot_clean = slot_name.lower().replace(" ", "_")
+                        param_clean = parameter_name.lower()
+                        parameter_id = f"slot_{slot_clean}_{param_clean}"
+                        
+                        if parameter_id in self._slot_parameters:
+                            slot_param = self._slot_parameters[parameter_id]
+                            slot_param.available = True
+                            slot_param.value = parameter_value
+                            
+                            # Store data for entities to use
+                            data[parameter_id] = {
+                                "value": parameter_value,
+                                "slot_name": slot_name,
+                                "parameter": parameter_name
+                            }
+                
+                # Log any slot parameters that weren't in the bulk response
+                for param_id, slot_param in self._slot_parameters.items():
+                    if not slot_param.available:
+                        _LOGGER.warning("Slot parameter %s is not responding, marking as unavailable", param_id)
+                        data[param_id] = {}  # Empty data for unavailable parameter
+                        
+            except Exception as err:
+                _LOGGER.error("Error updating slot parameters: %s", err)
+                # Don't raise here, as slot parameters are optional
+            
+            # Update sensor data
             for sensor_id, sensor in self._sensors.items():
                 try:
                     sensor_data = await self.api.get_sensor_state(sensor_id)
@@ -199,6 +254,29 @@ class MannitoFarmingDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]])
 
         """
         return list(self._sensors.values())
+
+    async def get_slot_parameter(self, parameter_id: str) -> SlotParameter | None:
+        """
+        Get slot parameter information.
+        
+        Args:
+            parameter_id: Slot parameter ID to get
+            
+        Returns:
+            SlotParameter object if found, None otherwise
+
+        """
+        return self._slot_parameters.get(parameter_id)
+
+    async def get_all_slot_parameters(self) -> list[SlotParameter]:
+        """
+        Get all slot parameters.
+        
+        Returns:
+            List of all slot parameters
+
+        """
+        return list(self._slot_parameters.values())
 
     async def async_set_device_state(self, device_id: str, state: bool) -> bool:
         """
@@ -274,6 +352,10 @@ class MannitoFarmingDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]])
             sensors = await self.api.discover_sensors()
             for sensor in sensors:
                 self._sensors[sensor.sensor_id] = sensor
+
+            slot_parameters = await self.api.discover_slot_parameters()
+            for slot_param in slot_parameters:
+                self._slot_parameters[slot_param.parameter_id] = slot_param
 
         except Exception as err:
             _LOGGER.error("Error discovering devices and sensors: %s", err)
