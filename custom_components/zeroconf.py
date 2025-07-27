@@ -9,6 +9,7 @@ from .const import DOMAIN
 async def async_setup_zeroconf(hass):
     """Set up Zeroconf discovery."""
 
+
 class MannitoFarmingConfigFlow(ConfigFlow, domain=DOMAIN):
     """Handle Zeroconf discovery for Mannito Farming."""
 
@@ -20,12 +21,30 @@ class MannitoFarmingConfigFlow(ConfigFlow, domain=DOMAIN):
             return self.async_abort(reason="invalid_service_type")
 
         host = discovery_info.host
-        name = discovery_info.properties.get("name", discovery_info.hostname)
-        model = discovery_info.properties.get("model", "Mannito Farming Controller")
-        version = discovery_info.properties.get("version", "Unknown")
+        
+        # Extract device information from mDNS TXT records
+        properties = discovery_info.properties
+        name = properties.get("name", discovery_info.hostname)
+        device_id = properties.get("id", discovery_info.hostname)
+        model = properties.get("model", "Mannito Farming Controller")
+        version = properties.get("version", "Unknown")
+        manufacturer = properties.get("manufacturer", "Mannito")
+        serial_number = properties.get("serial", "Unknown")
+        hw_version = properties.get("hw_version", "Unknown")
 
-        await self.async_set_unique_id(discovery_info.hostname)
-        self._abort_if_unique_id_configured()
+        # Use device ID as unique identifier for Home Assistant
+        await self.async_set_unique_id(device_id)
+        self._abort_if_unique_id_configured(
+            updates={
+                CONF_HOST: host,
+                CONF_NAME: name,
+                "model": model,
+                "version": version,
+                "manufacturer": manufacturer,
+                "serial_number": serial_number,
+                "hw_version": hw_version,
+            }
+        )
 
         self.context["title_placeholders"] = {"name": name}
         return await self.async_step_user(
@@ -34,6 +53,9 @@ class MannitoFarmingConfigFlow(ConfigFlow, domain=DOMAIN):
                 CONF_NAME: name,
                 "model": model,
                 "version": version,
+                "manufacturer": manufacturer,
+                "serial_number": serial_number,
+                "hw_version": hw_version,
             }
         )
 
@@ -45,6 +67,11 @@ class MannitoFarmingConfigFlow(ConfigFlow, domain=DOMAIN):
                 data={
                     CONF_HOST: user_input[CONF_HOST],
                     CONF_NAME: user_input[CONF_NAME],
+                    "model": user_input.get("model", "Mannito Farming Controller"),
+                    "version": user_input.get("version", "Unknown"),
+                    "manufacturer": user_input.get("manufacturer", "Mannito"),
+                    "serial_number": user_input.get("serial_number", "Unknown"),
+                    "hw_version": user_input.get("hw_version", "Unknown"),
                 },
             )
         return self.async_show_form(step_id="user")
