@@ -180,30 +180,86 @@ class MannitoFarmingDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]])
                 _LOGGER.error("Error updating slot parameters: %s", err)
                 # Don't raise here, as slot parameters are optional
             
-            # Update sensor data
-            for sensor_id, sensor in self._sensors.items():
-                try:
-                    sensor_data = await self.api.get_sensor_state(sensor_id)
-                    data[sensor_id] = sensor_data
-
-                    _LOGGER.debug("Mannito-Sensor data: %s", sensor_data)
-
-                    # If we got a valid response, the sensor is available
-                    if sensor_data:
-                        sensor.available = True
-                        # Update stored sensor value
-                        if "sensor_value" in sensor_data:
-                            if sensor_data.get("is_valid"):
-                                sensor.sensor_value = sensor_data["sensor_value"]
-                    else:
-                        # Empty response means the sensor is not available
-                        sensor.available = False
-                        _LOGGER.warning("Sensor %s is not responding, marking as unavailable", sensor_id)
-                except Exception as err:
-                    # If an error occurred, the sensor is not available
+            # Update sensor data from the same bulk response
+            try:
+                sensors_data = bulk_response.get("sensors", []) if bulk_response else []
+                _LOGGER.debug("Sensors data received: %s", sensors_data)
+                
+                # First mark all sensors as unavailable
+                for sensor in self._sensors.values():
                     sensor.available = False
-                    _LOGGER.error("Error updating sensor %s: %s", sensor_id, err)
-                    raise UpdateFailed(f"Error updating data: {err}")
+                
+                # Process sensor data from bulk response
+                for sensor_info in sensors_data:
+                    sensor_id = sensor_info.get("id")
+                    if sensor_id and sensor_id in self._sensors:
+                        sensor = self._sensors[sensor_id]
+                        
+                        # Sensor responded, so it's available
+                        sensor.available = True
+                        
+                        # Update stored sensor value if valid
+                        if sensor_info.get("is_valid") and "sensor_value" in sensor_info:
+                            sensor.sensor_value = sensor_info["sensor_value"]
+                        
+                        # Store sensor data for entities to use
+                        data[sensor_id] = {
+                            "sensor_value": sensor_info.get("sensor_value"),
+                            "unit": sensor_info.get("unit"),
+                            "is_valid": sensor_info.get("is_valid", False),
+                            "is_enabled": sensor_info.get("is_enabled", False),
+                            "lastReading": sensor_info.get("lastReading", ""),
+                            "is_initialized": sensor_info.get("is_initialized", False),
+                            "initialize_message": sensor_info.get("initialize_message", ""),
+                            "polling_interval": sensor_info.get("polling_interval", 0)
+                        }
+
+                        _LOGGER.debug("Mannito-Sensor data: %s", data[sensor_id])
+                
+                # Log any sensors that weren't in the bulk response
+                for sensor_id, sensor in self._sensors.items():
+                    if not sensor.available:
+                        _LOGGER.warning("Sensor %s is not responding, marking as unavailable", sensor_id)
+                        data[sensor_id] = {}  # Empty data for unavailable sensor
+                        
+            except Exception as err:
+                _LOGGER.error("Error updating sensors from bulk response: %s", err)
+                # Don't raise here, as sensors are optional
+
+            # Update system uptime sensor
+            try:
+                if "system_uptime" in self._sensors:
+                    system_status = await self.api.get_system_status()
+                    uptime_seconds = system_status.get("uptime", 0)
+                    
+                    uptime_sensor = self._sensors["system_uptime"]
+                    uptime_sensor.available = True
+                    uptime_sensor.sensor_value = str(uptime_seconds)
+                    
+                    # Store uptime data for entities to use
+                    data["system_uptime"] = {
+                        "sensor_value": uptime_seconds,
+                        "unit": "s",
+                        "is_valid": True,
+                        "is_enabled": True,
+                        "lastReading": system_status.get("currentTime", ""),
+                        "is_initialized": True,
+                        "initialize_message": "",
+                        "polling_interval": DEFAULT_UPDATE_INTERVAL,
+                        "currentTime": system_status.get("currentTime"),
+                        "firmwareVersion": system_status.get("firmwareVersion"),
+                        "networkConnected": system_status.get("networkConnected", False),
+                        "freeHeap": system_status.get("freeHeap", 0)
+                    }
+                    
+                    _LOGGER.debug("System uptime sensor data: %s", data["system_uptime"])
+                        
+            except Exception as err:
+                if "system_uptime" in self._sensors:
+                    self._sensors["system_uptime"].available = False
+                    data["system_uptime"] = {}
+                _LOGGER.error("Error updating system uptime sensor: %s", err)
+                # Don't raise here, as uptime sensor is optional
 
             return data
         except Exception as err:

@@ -114,6 +114,7 @@ class SensorType(StrEnum):
     LEAF_TEMPERATURE = "LEAF_TEMPERATURE"
     PH = "PH"
     EC = "EC"
+    UPTIME = "UPTIME"
     OTHER = "OTHER"
 
 class PluginType(StrEnum):
@@ -346,6 +347,24 @@ class API:
             _LOGGER.error("Error getting all device states: %s", err)
             raise APIConnectionError(f"Error getting all device states: {err}")
 
+    async def get_system_status(self) -> dict[str, Any]:
+        """
+        Get system status including uptime.
+        
+        Returns:
+            Dictionary with system status information from /api/system/status
+
+        """
+        url = f"http://{self.host}/api/system/status"
+        try:
+            async with self.session.get(url, auth=self.auth) as response:
+                if response.status == 200:
+                    return await response.json()
+                return {}
+        except Exception as err:
+            _LOGGER.error("Error getting system status: %s", err)
+            raise APIConnectionError(f"Error getting system status: {err}")
+
     async def get_device_state(self, component_name: str) -> dict[str, Any]:
         """
         Get the state of a device.
@@ -453,6 +472,14 @@ class API:
                     sensor_type=sensor_type,
                     name=sensor.get("name"),
                 ))
+
+            # Add system uptime sensor
+            sensors.append(Sensor(
+                sensor_id="system_uptime",
+                sensor_unique_id=f"{self.host}_system_uptime",
+                sensor_type=SensorType.UPTIME,
+                name="System Uptime",
+            ))
 
             return sensors
         except Exception as err:
