@@ -6,27 +6,77 @@ from unittest.mock import AsyncMock, MagicMock, patch
 # Mock test case for the new bulk device state functionality
 def test_bulk_device_response_format():
     """Test that the expected bulk device response format is correctly parsed."""
-    # This is the expected response format from the issue description
+    # This is the expected response format from the new API structure
     expected_response = {
+        "deviceId": "3bd6ab56-98c7-4a23-9fe7-3448483bc96d",
+        "serialnumber": "C4:D8:D5:8D:5A:60",
+        "version": "2.3.126",
+        "hardware_version": "3",
+        "ip_address": "192.168.178.84",
+        "uptime": 189,
+        "firmwareUpdateAvailable": True,
         "devices": [
             {
-                "device_id": "DEVICE_001",
-                "state": True
+                "id": "DEVICE_001",
+                "device_type": "GENERIC_SOCKET",
+                "name": "Device 1",
+                "state": True,
+                "powerlevel": 0,
+                "powerlevel_unit": "NOT_SUPPORTED",
+                "powerlevel_supported": False,
+                "is_enabled": True,
+                "is_initialized": True
             },
             {
-                "device_id": "DEVICE_002", 
+                "id": "DEVICE_002", 
+                "device_type": "DC_FAN",
+                "name": "Device 2",
                 "state": False,
                 "powerlevel": 0,
-                "powerlevel_unit": "PERCENTAGE"
+                "powerlevel_unit": "PERCENTAGE",
+                "powerlevel_supported": True,
+                "is_enabled": True,
+                "is_initialized": True
             },
             {
-                "device_id": "DEVICE_003",
+                "id": "DEVICE_003",
+                "device_type": "DC_FAN",
+                "name": "Device 3",
                 "state": True,
                 "powerlevel": 35,
-                "powerlevel_unit": "PERCENTAGE"
+                "powerlevel_unit": "PERCENTAGE",
+                "powerlevel_supported": True,
+                "is_enabled": True,
+                "is_initialized": True
             }
         ],
-        "sensors": []
+        "sensors": [
+            {
+                "id": "SENSOR_001",
+                "sensor_type": "TEMPERATURE",
+                "name": "Temperature Sensor 1",
+                "unit": "°C",
+                "sensor_value": 26.7,
+                "is_valid": True,
+                "is_enabled": True,
+                "is_initialized": True
+            }
+        ],
+        "slots": [
+            {
+                "name": "Default Slot",
+                "parameters": [
+                    {
+                        "parameter": "AIR_TEMPERATURE",
+                        "value": 21
+                    },
+                    {
+                        "parameter": "AIR_HUMIDITY",
+                        "value": 53
+                    }
+                ]
+            }
+        ]
     }
     
     # Verify the structure matches what the coordinator expects
@@ -36,16 +86,18 @@ def test_bulk_device_response_format():
     
     # Device 1: Simple state only
     device1 = devices_data[0]
-    assert device1["device_id"] == "DEVICE_001"
+    assert device1["id"] == "DEVICE_001"
     assert device1["state"] is True
-    assert "powerlevel" not in device1
+    assert device1["powerlevel"] == 0
+    assert device1["powerlevel_supported"] is False
     
     # Device 2: State with powerlevel 0
     device2 = devices_data[1]
-    assert device2["device_id"] == "DEVICE_002"
+    assert device2["id"] == "DEVICE_002"
     assert device2["state"] is False
     assert device2["powerlevel"] == 0
     assert device2["powerlevel_unit"] == "PERCENTAGE"
+    assert device2["powerlevel_supported"] is True
     
     # Device 3: State with non-zero powerlevel
     device3 = devices_data[2]

@@ -145,7 +145,7 @@ class MannitoFarmingDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]])
                     slot_param.available = False
                 
                 # Process slots data and update parameter values
-                for slot in slots_data:
+                for slot_index, slot in enumerate(slots_data):
                     slot_name = slot.get("name", "Unknown Slot")
                     parameters = slot.get("parameters", [])
                     
@@ -153,10 +153,10 @@ class MannitoFarmingDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]])
                         parameter_name = param.get("parameter", "OTHER")
                         parameter_value = param.get("value", 0)
                         
-                        # Create the same ID format as in discovery
+                        # Create the same ID format as in discovery - include slot index
                         slot_clean = slot_name.lower().replace(" ", "_")
                         param_clean = parameter_name.lower()
-                        parameter_id = f"slot_{slot_clean}_{param_clean}"
+                        parameter_id = f"slot_{slot_clean}_{slot_index}_{param_clean}"
                         
                         if parameter_id in self._slot_parameters:
                             slot_param = self._slot_parameters[parameter_id]
@@ -167,7 +167,8 @@ class MannitoFarmingDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]])
                             data[parameter_id] = {
                                 "value": parameter_value,
                                 "slot_name": slot_name,
-                                "parameter": parameter_name
+                                "parameter": parameter_name,
+                                "slot_index": slot_index
                             }
                 
                 # Log any slot parameters that weren't in the bulk response
@@ -226,11 +227,10 @@ class MannitoFarmingDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]])
                 _LOGGER.error("Error updating sensors from bulk response: %s", err)
                 # Don't raise here, as sensors are optional
 
-            # Update system uptime sensor
+            # Update system uptime sensor from bulk response
             try:
                 if "system_uptime" in self._sensors:
-                    system_status = await self.api.get_system_status()
-                    uptime_seconds = system_status.get("uptime", 0)
+                    uptime_seconds = bulk_response.get("uptime", 0) if bulk_response else 0
                     
                     uptime_sensor = self._sensors["system_uptime"]
                     uptime_sensor.available = True
@@ -242,14 +242,14 @@ class MannitoFarmingDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]])
                         "unit": "s",
                         "is_valid": True,
                         "is_enabled": True,
-                        "lastReading": system_status.get("currentTime", ""),
+                        "lastReading": "",
                         "is_initialized": True,
                         "initialize_message": "",
                         "polling_interval": DEFAULT_UPDATE_INTERVAL,
-                        "currentTime": system_status.get("currentTime"),
-                        "firmwareVersion": system_status.get("firmwareVersion"),
-                        "networkConnected": system_status.get("networkConnected", False),
-                        "freeHeap": system_status.get("freeHeap", 0)
+                        "version": bulk_response.get("version", "") if bulk_response else "",
+                        "deviceId": bulk_response.get("deviceId", "") if bulk_response else "",
+                        "serialnumber": bulk_response.get("serialnumber", "") if bulk_response else "",
+                        "firmwareUpdateAvailable": bulk_response.get("firmwareUpdateAvailable", False) if bulk_response else False
                     }
                     
                     _LOGGER.debug("System uptime sensor data: %s", data["system_uptime"])

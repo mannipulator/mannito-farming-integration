@@ -80,6 +80,9 @@ class DeviceType(StrEnum):
     PERISTALTIC_PUMP = "PERISTALTIC_PUMP"
     MISTING_SYSTEM = "MISTING_SYSTEM"
     GENERIC_SOCKET = "GENERIC_SOCKET"
+    
+    # Light type
+    LIGHT = "LIGHT"
 
     OTHER = "OTHER"
 
@@ -168,6 +171,10 @@ class Device:
     name: str
     state: bool = False
     powerlevel: int | None = None
+    powerlevel_supported: bool = False
+    max_powerlevel: int = 255
+    is_enabled: bool = True
+    is_initialized: bool = True
     available: bool = True
 
 @dataclass
@@ -178,7 +185,11 @@ class Sensor:
     sensor_unique_id: str
     sensor_type: SensorType
     name: str
-    sensor_value: str = ""
+    sensor_value: str | float | int = ""
+    unit: str = ""
+    is_valid: bool = True
+    is_enabled: bool = True
+    is_initialized: bool = True
     available: bool = True
 
 @dataclass
@@ -334,10 +345,10 @@ class API:
         Get the states of all devices using the bulk endpoint.
         
         Returns:
-            Dictionary with all device states from /api/devices/all
+            Dictionary with all device states from /api/components/summary
 
         """
-        url = f"http://{self.host}/api/devices/all"
+        url = f"http://{self.host}/api/components/summary"
         try:
             async with self.session.get(url, auth=self.auth) as response:
                 if response.status == 200:
@@ -397,7 +408,7 @@ class API:
             APIConnectionError: If connection fails
 
         """
-        url = f"http://{self.host}/api/config"
+        url = f"http://{self.host}/api/components/summary"
         try:
             async with self.session.get(url, auth=self.auth) as response:
                 if response.status != 200:
@@ -416,8 +427,6 @@ class API:
 
         """
         devices = []
-        sensors = []
-        plugins = []
         try:
             config = await self.fetch_device_config()
             deviceList = config.get("devices", [])
@@ -436,6 +445,13 @@ class API:
                     device_unique_id=f"{self.host}_{deviceid}",
                     device_type=device_type,
                     name=device.get("name"),
+                    state=device.get("state", False),
+                    powerlevel=device.get("powerlevel"),
+                    powerlevel_supported=device.get("powerlevel_supported", False),
+                    max_powerlevel=device.get("max_powerlevel", 255),
+                    is_enabled=device.get("is_enabled", True),
+                    is_initialized=device.get("is_initialized", True),
+                    available=device.get("is_enabled", True) and device.get("is_initialized", True),
                 ))
 
             return devices
@@ -471,6 +487,12 @@ class API:
                     sensor_unique_id=f"{self.host}_{sensorid}",
                     sensor_type=sensor_type,
                     name=sensor.get("name"),
+                    sensor_value=sensor.get("sensor_value", ""),
+                    unit=sensor.get("unit", ""),
+                    is_valid=sensor.get("is_valid", True),
+                    is_enabled=sensor.get("is_enabled", True),
+                    is_initialized=sensor.get("is_initialized", True),
+                    available=sensor.get("is_enabled", True) and sensor.get("is_initialized", True),
                 ))
 
             # Add system uptime sensor
@@ -479,16 +501,18 @@ class API:
                 sensor_unique_id=f"{self.host}_system_uptime",
                 sensor_type=SensorType.UPTIME,
                 name="System Uptime",
+                sensor_value=config.get("uptime", 0),
+                unit="s",
             ))
 
             return sensors
         except Exception as err:
-            _LOGGER.error("Error discovering devices: %s", err)
+            _LOGGER.error("Error discovering sensors: %s", err)
             return []
 
     async def discover_slot_parameters(self) -> list[SlotParameter]:
         """
-        Discover available slot parameters from the /devices/all endpoint.
+        Discover available slot parameters from the /api/components/summary endpoint.
         
         Returns:
             List of discovered slot parameters
@@ -500,7 +524,7 @@ class API:
             bulk_data = await self.get_all_device_states()
             slots_data = bulk_data.get("slots", [])
 
-            for slot in slots_data:
+            for slot_index, slot in enumerate(slots_data):
                 slot_name = slot.get("name", "Unknown Slot")
                 parameters = slot.get("parameters", [])
                 
@@ -514,17 +538,17 @@ class API:
                         _LOGGER.warning("Unknown slot parameter type: %s, using OTHER", parameter_name)
                         slot_sensor_type = SlotSensorType.OTHER
                     
-                    # Create unique IDs
+                    # Create unique IDs - include slot index to handle duplicate slot names
                     slot_clean = slot_name.lower().replace(" ", "_")
                     param_clean = parameter_name.lower()
-                    parameter_id = f"slot_{slot_clean}_{param_clean}"
+                    parameter_id = f"slot_{slot_clean}_{slot_index}_{param_clean}"
                     
                     slot_parameters.append(SlotParameter(
                         slot_name=slot_name,
                         parameter=slot_sensor_type,
                         parameter_id=parameter_id,
                         parameter_unique_id=f"{self.host}_{parameter_id}",
-                        name=f"{slot_name} - {parameter_name.replace('_', ' ').title()}",
+                        name=f"{slot_name} {slot_index + 1} - {parameter_name.replace('_', ' ').title()}",
                         value=parameter_value,
                     ))
 
@@ -544,13 +568,13 @@ class API:
         _LOGGER.info("Found device-info: %s", self.device_info)
 
         return {
-            "model": self.device_info.get("model", "Unknown Model"),
-            "sw_version": self.device_info.get("firmware_version", "Unknown Version"),
+            "model": "Mannito Farming Controller",
+            "sw_version": self.device_info.get("version", "Unknown Version"),
             "hw_version": self.device_info.get("hardware_version", "Unknown Version"),
-            "serial_number": self.device_info.get("serial_number", "Unknown Serial"),
-            "manufacturer": self.device_info.get("manufacturer", "Mannito"),
+            "serial_number": self.device_info.get("serialnumber", "Unknown Serial"),
+            "manufacturer": "Mannito",
             "uptime": self.device_info.get("uptime", "Unknown Uptime"),
             "ip_address": self.device_info.get("ip_address", self.host),
             "configuration_url": f"http://{self.host}",
-            "name": self.device_info.get("name", f"Mannito Farming {self.host}"),
+            "name": f"Mannito Farming {self.host}",
         }

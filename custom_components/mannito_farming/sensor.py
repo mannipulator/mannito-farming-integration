@@ -60,7 +60,7 @@ SENSOR_DESCRIPTIONS_MAP = {
         state_class=SensorStateClass.MEASUREMENT
     ),
     "EC": MannitoFarmingSensorEntityDescription(
-        key= "CONDUCTIVITY",
+        key= "EC",
         translation_key="conductivity",
         device_class=SensorDeviceClass.CONDUCTIVITY,
         native_unit_of_measurement=None,
